@@ -1,10 +1,12 @@
+const { auth } = require('firebase-admin');
 const db = require('../config/db');
 
 class User {
-    constructor(name, email, phone) {
+    constructor(name, email, phone, authId) {
         this.name = name;
         this.email = email;
         this.phone = phone;
+        this.authId = authId;
     }
 
     async save() {
@@ -12,12 +14,14 @@ class User {
         INSERT INTO user(
             name,
             phone,
-            email
+            email,
+            id_firebase_auth
         )
         VALUES(
             '${this.name}',
             '${this.phone}',
-            '${this.email}'
+            '${this.email}',
+            '${this.authId}'
         );`;
 
         const [newUser, _] = await db.execute(sql);
@@ -38,6 +42,12 @@ class User {
 
     static findById(id) {
         let sql = `SELECT * FROM user where iduser = ${id};`;
+
+        return db.execute(sql);
+    }
+
+    static findByAuthId(id) {
+        let sql = `SELECT * FROM user where id_firebase_auth = '${id}';`;
 
         return db.execute(sql);
     }

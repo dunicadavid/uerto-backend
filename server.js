@@ -4,7 +4,7 @@ const express = require('express');
 const fs = require('fs');
 const helmet = require('helmet');
 const https = require('https');
-const middleware = require('../models/Middleware');
+const middleware = require('./models/Middleware');
 
 const app = express();
 
@@ -16,8 +16,8 @@ app.use(helmet());
 app.use(express.json());
 app.use(middleware.decodeToken);
 
-app.use("/places",require("./routes/placeRoutes")); 
 app.use("/users",require("./routes/userRoutes"));
+app.use("/places",require("./routes/placeRoutes")); 
 app.use("/reservations",require("./routes/reservationRoutes"));
 
 
