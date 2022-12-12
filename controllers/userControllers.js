@@ -5,14 +5,19 @@ exports.createUser = async (req, res, next) => {
 
         let {name, email, phone, authId} = req.body;
         let user = new User(name,email,phone,authId);
-        console.log(req.body);
+
         user = await user.save();
 
-        res.status(201).json({message : "User created", });
+        let [resUser, _ ] = await User.findByAuthId(authId);
 
+        res.status(201).json({message : "User created", user : {userId : resUser[0].iduser, fullname : resUser[0].name, phoneNumber : resUser[0].phone, email : resUser[0].email, uid : resUser[0].idauth}});
+    
     } catch (error) {
         console.log(error);
-        next(error);
+        if(error.code === 'ER_DUP_ENTRY')
+            res.status(405).json({message : "Mobile number already taken."});
+        else 
+            next(error);
     }
 }
 
@@ -23,7 +28,7 @@ exports.updateUser = async (req, res, next) => {
         let user = new User(name,email,phone);
 
         user = await user.update(id);
-
+        
         res.status(201).json({message : "User updated"});
 
     } catch (error) {
@@ -38,7 +43,7 @@ exports.getUserById = async (req, res, next) => {
         let userId = req.params.id;
         let [user, _ ] = await User.findById(userId);
 
-        res.status(200).json({userId : user[0].iduser, fullname : user[0].name, phoneNumber : user[0].phone, email : user[0].email, uid : user[0].id_firebase_auth});
+        res.status(200).json({userId : user[0].iduser, fullname : user[0].name, phoneNumber : user[0].phone, email : user[0].email, uid : user[0].idauth});
 
     } catch (error) {
         console.log(error);
@@ -56,8 +61,8 @@ exports.getUserByAuthId = async (req, res, next) => {
         if(user.length === 0) {
             res.status(204).json({message : "No user information"});
         } else {
-            console.log({userId : user[0].iduser, fullname : user[0].name, phoneNumber : user[0].phone, email : user[0].email, uid : user[0].id_firebase_auth});
-            res.status(200).json({userId : user[0].iduser, fullname : user[0].name, phoneNumber : user[0].phone, email : user[0].email, uid : user[0].id_firebase_auth});
+            console.log({userId : user[0].iduser, fullname : user[0].name, phoneNumber : user[0].phone, email : user[0].email, uid : user[0].idauth});
+            res.status(200).json({userId : user[0].iduser, fullname : user[0].name, phoneNumber : user[0].phone, email : user[0].email, uid : user[0].idauth});
         }
 
     } catch (error) {

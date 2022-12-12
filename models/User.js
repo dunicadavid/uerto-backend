@@ -3,6 +3,7 @@ const db = require('../config/db');
 
 class User {
     constructor(name, email, phone, authId) {
+        
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -15,7 +16,7 @@ class User {
             name,
             phone,
             email,
-            id_firebase_auth
+            idauth
         )
         VALUES(
             '${this.name}',
@@ -47,7 +48,7 @@ class User {
     }
 
     static findByAuthId(id) {
-        let sql = `SELECT * FROM user where id_firebase_auth = '${id}';`;
+        let sql = `SELECT * FROM user where idauth = '${id}';`;
 
         return db.execute(sql);
     }
