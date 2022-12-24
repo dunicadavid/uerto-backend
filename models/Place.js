@@ -2,14 +2,14 @@ const db = require('../config/db');
 const geo = require('geo-hash');
 
 class Place {
-    constructor(name, category, location, latitude, longitude, hours_of_opp) {
+    constructor(name, category, location, latitude, longitude, hourOfOpp) {
         this.name = name;
         this.category = category;
         this.location = location;
         this.latitude = latitude;
         this.longitude = longitude;
         this.geohash = geo.encode(latitude, longitude);
-        this.hours_of_opp = hours_of_opp;
+        this.hourOfOpp = hourOfOpp;
     }
 
     async save() {
@@ -21,7 +21,7 @@ class Place {
             latitude,
             longitude,
             geohash,
-            hours_of_opp)
+            hoursOfOpp)
         VALUES(
             '${this.name}',
             '${this.category}',
@@ -29,7 +29,7 @@ class Place {
             '${this.latitude}',
             '${this.longitude}',
             '${this.geohash}',
-            '${this.hours_of_opp}'
+            '${this.hourOfOpp}'
         );`;
 
         const [newPlace, _] = await db.execute(sql);
@@ -43,7 +43,7 @@ class Place {
         sql = `SELECT idplace,name,category,location FROM place`;
 
         if (filter != '0') {
-            sql = sql + ` join place_filter_restaurant ON filter_restaurant = idfilter_restaurant WHERE ${filter}=1`;
+            sql = sql + ` join place_filter_restaurant ON filterRestaurant = idfilterRestaurant WHERE ${filter}=1`;
             whereClauseActive = 1;
         }
 
