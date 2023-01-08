@@ -95,9 +95,21 @@ class Place {
     }
 
     static availability(date, id, party_size) {
-        let sql = `select hour from activity_seating s join activity_arrangement a 
+        let sql = `select hour, idactivity_seating from activity_seating s join activity_arrangement a 
         on a.activity_seating = s.idactivity_seating 
         join reservation r on a.reservation=r.idreservation where r.date = '${date}' AND s.activity = ${id} AND s.capacity >= ${party_size};`;
+
+        return db.execute(sql);
+    }
+
+    static seating(id, party_size) {
+        let sql = `select * from activity_seating where activity = ${id} AND capacity >= ${party_size} ORDER BY capacity ASC;`;
+
+        return db.execute(sql);
+    }
+
+    static activityInfo(id) {
+        let sql = `select hoursOfOpp, reservationTime from activity where idactivity = ${id};`;
 
         return db.execute(sql);
     }

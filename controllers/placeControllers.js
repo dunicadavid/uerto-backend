@@ -98,7 +98,7 @@ exports.getActivities = async (req, res, next) => {
         let placeId = req.params.id;
         let [place, _ ] = await Place.activities(placeId);
 
-        res.status(200).json({place : place});
+        res.status(200).json({activities : place});
     } catch (error) {
         console.log(error);
         next(error);
@@ -151,6 +151,30 @@ exports.getAvailability = async (req, res, next) => {
     try {
         let {date, activityId, partySize} = req.body;
         let [reservations, _ ] = await Place.availability(date,activityId,partySize);
+        let [seating,] = await Place.seating(activityId,partySize);
+        let [activityInfo,] = await Place.activityInfo(activityId);
+        let {hoursOfOpp,reservationTime} = activityInfo[0];
+ 
+        let activityTimeDivision = reservationTime / 5 ;
+        let totalTimeDivision = (parseInt(hoursOfOpp.slice(6,8)) - parseInt(hoursOfOpp.slice(0,2))) * 12 + parseInt(hoursOfOpp.slice(9,11)) / 5 + 1 - parseInt(hoursOfOpp.slice(3,5)) / 5;
+        
+        let reservationMatrix = [];
+
+        for(let i = 0 ; i < seating.length ; i++) {
+            reservationMatrix.push(Array(totalTimeDivision).fill(0));
+        }
+
+        reservations.forEach((value)=>{
+            let startIndex = (parseInt(value.hour.slice(0,2)) - parseInt(hoursOfOpp.slice(0,2))) * 12 + parseInt(value.hour.slice(3,5)) / 5 - parseInt(hoursOfOpp.slice(3,5)) / 5;
+            let endIndex = startIndex + activityTimeDivision;
+            for(let i = startIndex ; i < endIndex ; i++) {
+                reservationMatrix[value.idactivity_seating - 1][i] = 1;
+            }
+            //console.log(value.idactivity_seating, value.hour, startIndex);
+        });
+
+        //console.log(seating);
+        //console.log(reservationMatrix);
 
         res.status(200).json({reservations});
     } catch (error) {
@@ -158,3 +182,4 @@ exports.getAvailability = async (req, res, next) => {
         next(error);
     }
 }
+
