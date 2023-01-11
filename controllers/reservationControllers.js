@@ -2,12 +2,16 @@ const Reservation = require('../models/Reservation');
 
 exports.createReservation = async (req, res, next) => {
     try {
-        let {idplace, iduser, date, hour, party_size} = req.body;
-        let reservation = new Reservation(idplace, iduser, date, hour, party_size);
+        let {idplace, idactivity, idactivity_seating, iduser, date, hour, party_size} = req.body;
+        let reservation = new Reservation(idplace, idactivity, iduser, date, hour, party_size);
 
-        reservation = await reservation.save();
+        if (await reservation.verifyReservationConsistancy(idactivity_seating)) {
+            reservation = await reservation.save();
+            res.status(201).json({message : "Reservaion created"});
+        } else {
+            res.status(406).json({message : "Not Acceptable"});
+        }
 
-        res.status(201).json({message : "Reservaion created"});
     }
     catch (error) {
         console.log(error);

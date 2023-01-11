@@ -57,7 +57,6 @@ exports.getUserByAuthId = async (req, res, next) => {
         let userAuthId = req.params.id;
         let [user, _ ] = await User.findByAuthId(userAuthId);
 
-        
         if(user.length === 0) {
             res.status(204).json({message : "No user information"});
         } else {
