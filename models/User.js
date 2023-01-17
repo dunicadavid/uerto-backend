@@ -1,5 +1,5 @@
 const { auth } = require('firebase-admin');
-const db = require('../config/db');
+const { db } = require('../config/db');
 
 class User {
     constructor(name, email, phone, authId) {
