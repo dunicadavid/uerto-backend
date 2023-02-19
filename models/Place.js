@@ -37,20 +37,60 @@ class Place {
         return newPlace;
     }
 
-    static findAll(filter, proximityGeohashes,sortedBy) {            //ADAUGA FILTRU DUPA RATING SAU PRICE-RANGE
+    async updateInfo(idplace, name, hoursOfOpp, category, price) {
+        const sql = 'UPDATE place SET name = ?, hoursOfOpp = ?, category = ?, price= ? WHERE idplace = ?;';
+        const params = [name,hoursOfOpp,category,parseFloat(price),parseInt(idplace)];
+        
+        const [updateInfoPlace, _] = await db.query(sql,params);
+
+        return updateInfoPlace;
+    }
+
+    async updateLocation(idplace, location, latitude, longitude, geohash) {
+        const sql = 'UPDATE place SET location = ?, latitude = ?, longitude = ?, geohash = ? WHERE idplace = ?;';
+        const params = [location, parseFloat(latitude), parseFloat(longitude), geohash ,parseInt(idplace)];
+        
+        const [updateLocationPlace, _] = await db.query(sql,params);
+
+        return updateLocationPlace;
+    }
+
+    async updateFilterRestaurant(idplace,queryString) {
+        const sql = `UPDATE uerto.place_filter_restaurant SET ${queryString} WHERE idfilterRestaurant = (SELECT filterRestaurant FROM uerto.place WHERE idplace = ? LIMIT 1);`;
+        const params = [idplace];
+
+        const [updateFilterPlace, _] = await db.query(sql,params);
+
+        return updateFilterPlace;
+    }
+
+    async updateFilterLeasure(idplace,queryString) {
+        const sql = `UPDATE uerto.place_filter_leasure SET ${queryString} WHERE idfilterLeasure = (SELECT filterLeasure FROM uerto.place WHERE idplace = ? LIMIT 1);`;
+        const params = [idplace];
+
+        const [updateFilterPlace, _] = await db.query(sql,params);
+
+        return updateFilterPlace;
+    }
+
+    static findAll(filter, proximityGeohashes, type, sortedBy) {            
         let sql;
-        let whereClauseActive = 0;
+        let whereClauseActive = false;
         sql = `SELECT idplace,name,category,location FROM place`;
 
         if (filter != '0') {
-            sql = sql + ` join place_filter_restaurant ON filterRestaurant = idfilterRestaurant WHERE ${filter}=1`;
-            whereClauseActive = 1;
+            sql = sql + ` join place_filter_restaurant ON filterRestaurant = idfilterRestaurant WHERE category='${type}' AND ${filter}=1`;
+            whereClauseActive = true;
         }
 
         if (proximityGeohashes.length > 0) {
-            if (!whereClauseActive) { sql = sql + ' WHERE' } else {sql = sql + ' AND'}
+            if (!whereClauseActive) { sql = sql + ` WHERE category='${type}' AND` } else {sql = sql + ' AND'}
             sql = sql + ` SUBSTRING(geohash,1,6) IN (${proximityGeohashes})`; 
-            whereClauseActive = 1;
+            whereClauseActive = true;
+        }
+
+        if(whereClauseActive === false) {
+            sql +=  ` WHERE category='${type}'`;
         }
 
         if(sortedBy != '0') {
@@ -70,8 +110,6 @@ class Place {
             }
         }
 
-        //console.log(sql);
-
         return db.execute(sql);
 
     }
@@ -88,6 +126,20 @@ class Place {
         return db.execute(sql);
     }
 
+    static favouriteCheck(iduser,idplace) {
+        const sql = 'SELECT COUNT(user) AS favourite FROM uerto.user_favourite_place WHERE user = ? AND place = ?;';
+        const param = [parseInt(iduser),parseInt(idplace)];
+
+        return db.query(sql,param);
+    }
+
+    static findByFavourite(iduser) {
+        const sql = `select idplace,name,category,location from uerto.place p JOIN uerto.user_favourite_place f ON p.idplace = f.place WHERE user = ?;`;
+        const param = [iduser];
+
+        return db.query(sql,param);
+    }
+
     static activities(id) {
         let sql = `SELECT * FROM activity where place = ${id};`;
 
@@ -95,8 +147,8 @@ class Place {
     }
 
     static availability(date, id, party_size) {
-        let sql = `select hour, idactivity_seating from activity_seating s join activity_arrangement a 
-        on a.activity_seating = s.idactivity_seating 
+        let sql = `select hour, idactivitySeating from activity_seating s join activity_arrangement a 
+        on a.activitySeating = s.idactivitySeating 
         join reservation r on a.reservation=r.idreservation where r.date = '${date}' AND s.activity = ${id} AND s.capacity >= ${party_size};`;
 
         return db.execute(sql);

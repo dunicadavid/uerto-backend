@@ -72,7 +72,7 @@ class Reservation {
                 parameters: [this.idplace, this.idactivity, this.iduser, this.date, this.hour, this.party_size]
             },
             {
-                query: 'INSERT INTO uerto.activity_arrangement (reservation, activity_seating) values (1000,?);',
+                query: 'INSERT INTO uerto.activity_arrangement (reservation, activity_seating) values (LAST_INSERT_ID(),?);',
                 parameters: [idactivity_seating]
             }
         ];
@@ -129,10 +129,25 @@ class Reservation {
         return reservationArray[thisHourIndex] === 0 && reservationArray[thisHourIndex + activityTimeDivision - 1] === 0;
     }
 
-    static findByUser(id) {
-        let sql = `SELECT * FROM reservation where customer = ${id};`;
+    static findById(id) {
+        let sql = `SELECT * FROM reservation where idreservation = ${id};`;
 
         return db.execute(sql);
+    }
+
+    static findByUser(iduser, time, date, hour) {
+        if(time === 'previous') {
+            const sql = `select * from reservation where customer = ${iduser} AND date < '${date}'
+            union 
+            select * from reservation where customer = ${iduser} AND date = '${date}' AND hour < '${hour}'`;
+            return db.execute(sql);
+        } else if (time === 'future') {
+            const sql = `select * from reservation where customer = ${iduser} AND date > '${date}'
+            union 
+            select * from reservation where customer = ${iduser} AND date = '${date}' AND hour > '${hour}'`;
+            return db.execute(sql);
+        }
+
     }
 }
 

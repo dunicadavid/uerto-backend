@@ -29,13 +29,37 @@ exports.createReservation = async (req, res, next) => {
 
 exports.getReservationsByUser = async (req, res, next) => {
     try {
-        let userId = req.params.id;
+        const {iduser, time} = req.body;
+        const date = new Date().toJSON().slice(0, 10);
+        const hour = new Date().toLocaleString("en-US", { hour12: false }).slice(11, 16);
+        console.log(iduser, time, date, hour); // "17/06/2022"
 
-        let [reservation, _ ] = await Reservation.findByUser(userId);
-
-        res.status(200).json({count : reservation.length,reservation});
+        const [reservation, _ ] = await Reservation.findByUser(iduser, time, date, hour);
+        if(reservation.length !== 0) {
+            res.status(200).json({count : reservation.length,reservation});
+        } else {
+            res.status(404).json({message : "There are no reservations available"});
+        }
+        
     }
     catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
+exports.getReservationById = async (req, res, next) => {
+    try {
+        const idreservation = req.params.id;
+        const [reservation, _ ] = await Reservation.findById(idreservation);
+        if(reservation.length !== 0) {
+            res.status(200).json(reservation[0]);
+        } else {
+            res.status(404).json({message : "There is no reservation with that id"});
+        }
+
+
+    } catch (error) {
         console.log(error);
         next(error);
     }
