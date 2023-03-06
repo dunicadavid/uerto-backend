@@ -2,13 +2,12 @@ const Reservation = require('../models/Reservation');
 
 exports.createReservation = async (req, res, next) => {
     try {
-        const {idplace, idactivity, idactivity_seating, iduser, date, hour, party_size} = req.body;
-        const reservation = new Reservation(idplace, idactivity, iduser, date, hour, party_size);
+        const {idplace, idactivity, idactivitySeating, iduser, date, hour, partySize} = req.body;
+        const reservation = new Reservation(idplace, idactivity, iduser, date, hour, partySize);
 
-        if (await reservation.verifyReservationConsistancy(idactivity_seating)) {
+        if (await reservation.verifyReservationConsistancy(idactivitySeating)) {
 
-            const err = await reservation.save(idactivity_seating);
-            console.log(err);
+            const err = await reservation.save(idactivitySeating);
             if(!err) {
                 res.status(201).json({message : "Reservaion created"});
             } else {
@@ -29,10 +28,13 @@ exports.createReservation = async (req, res, next) => {
 
 exports.getReservationsByUser = async (req, res, next) => {
     try {
-        const {iduser, time} = req.body;
+        const iduser = req.query.iduser;
+        const time = req.query.time;
+
+        console.log(iduser,time);
         const date = new Date().toJSON().slice(0, 10);
         const hour = new Date().toLocaleString("en-US", { hour12: false }).slice(11, 16);
-        console.log(iduser, time, date, hour); // "17/06/2022"
+        console.log(iduser, time, date, hour); 
 
         const [reservation, _ ] = await Reservation.findByUser(iduser, time, date, hour);
         if(reservation.length !== 0) {

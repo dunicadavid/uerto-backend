@@ -43,8 +43,8 @@ exports.updateUser = async (req, res, next) => {
 }
 
 exports.getUserById = async (req, res, next) => {
+    console.log('aici');
     try {
-
         let userId = req.params.id;
         console.log(userId)
         let [user, _] = await User.findById(userId);

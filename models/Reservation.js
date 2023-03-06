@@ -2,20 +2,20 @@ const { db } = require('../config/db');
 const mysql = require('mysql2/promise');
 
 class Reservation {
-    constructor(idplace, idactivity, iduser, date, hour, party_size) {
+    constructor(idplace, idactivity, iduser, date, hour, partySize) {
         this.idplace = idplace;
         this.idactivity = idactivity;
         this.iduser = iduser;
         this.date = date;
         this.hour = hour;
-        this.party_size = party_size;
+        this.partySize = partySize;
     }
 
     async saveOld(idactivity_seating) {
         const queries = [
             {
-                query: 'INSERT INTO uerto.reservation(place,activity,customer,date,hour,party_size)VALUES(?,?,?,?,?,?);',
-                parameters: [this.idplace, this.idactivity, this.iduser, this.date, this.hour, this.party_size]
+                query: 'INSERT INTO uerto.reservation(place,activity,customer,date,hour,partySize)VALUES(?,?,?,?,?,?);',
+                parameters: [this.idplace, this.idactivity, this.iduser, this.date, this.hour, this.partySize]
             },
             {
                 query: 'INSERT INTO uerto.activity_arrangement (reservation, activity_seating) values (1000,?);',
@@ -68,11 +68,11 @@ class Reservation {
 
         const queries = [
             {
-                query: 'INSERT INTO uerto.reservation(place,activity,customer,date,hour,party_size)VALUES(?,?,?,?,?,?);',
-                parameters: [this.idplace, this.idactivity, this.iduser, this.date, this.hour, this.party_size]
+                query: 'INSERT INTO uerto.reservation(place,activity,customer,date,hour,partySize)VALUES(?,?,?,?,?,?);',
+                parameters: [this.idplace, this.idactivity, this.iduser, this.date, this.hour, this.partySize]
             },
             {
-                query: 'INSERT INTO uerto.activity_arrangement (reservation, activity_seating) values (LAST_INSERT_ID(),?);',
+                query: 'INSERT INTO uerto.activity_arrangement (reservation, activitySeating) values (LAST_INSERT_ID(),?);',
                 parameters: [idactivity_seating]
             }
         ];
@@ -98,9 +98,9 @@ class Reservation {
     }
 
 
-    async verifyReservationConsistancy(idactivity_seating) {
+    async verifyReservationConsistancy(idactivitySeating) {
         let sql = `select hour from activity_arrangement s join reservation r on s.reservation=r.idreservation 
-        where r.date = '${this.date}' AND s.activity_seating = '${idactivity_seating}';`;
+        where r.date = '${this.date}' AND s.activitySeating = '${idactivitySeating}';`;
 
         const [reservations, _] = await db.execute(sql);
 

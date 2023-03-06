@@ -146,16 +146,16 @@ class Place {
         return db.execute(sql);
     }
 
-    static availability(date, id, party_size) {
+    static availability(date, id, partySize) {
         let sql = `select hour, idactivitySeating from activity_seating s join activity_arrangement a 
         on a.activitySeating = s.idactivitySeating 
-        join reservation r on a.reservation=r.idreservation where r.date = '${date}' AND s.activity = ${id} AND s.capacity >= ${party_size};`;
+        join reservation r on a.reservation=r.idreservation where r.date = '${date}' AND s.activity = ${id} AND s.capacity >= ${partySize};`;
 
         return db.execute(sql);
     }
 
-    static seating(id, party_size) {
-        let sql = `select * from activity_seating where activity = ${id} AND capacity >= ${party_size} ORDER BY capacity ASC;`;
+    static seating(id, partySize) {
+        let sql = `select * from activity_seating where activity = ${id} AND capacity >= ${partySize} ORDER BY capacity ASC;`;
 
         return db.execute(sql);
     }

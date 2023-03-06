@@ -282,62 +282,66 @@ exports.getAvailability = async (req, res, next) => {
         const totalTimeDivision = (parseInt(hoursOfOpp.slice(6, 8)) - parseInt(hoursOfOpp.slice(0, 2))) * 12 + parseInt(hoursOfOpp.slice(9, 11)) / 5 + 1 - parseInt(hoursOfOpp.slice(3, 5)) / 5;
         const divideTimeSearch = totalTimeDivision - activityTimeDivision - (totalTimeDivision - activityTimeDivision) % 3;
 
-        ///matrice pentru observarea sloturilor libere
-        let reservationMatrix = [];
+        ///matrice pentru observarea sloturilor libere de forma {id,[array diviziuni de timp]}
+        const reservationMatrix = new Map();
         ///lista cu variante de rezervare
         let result = [];
 
         for (let i = 0; i < seating.length; i++) {
-            reservationMatrix.push(Array(totalTimeDivision).fill(0));
+            reservationMatrix.set(seating[i].idactivitySeating , Array(totalTimeDivision).fill(0));
         }
+
         reservations.forEach((value) => {
             let startIndex = (parseInt(value.hour.slice(0, 2)) - parseInt(hoursOfOpp.slice(0, 2))) * 12 + parseInt(value.hour.slice(3, 5)) / 5 - parseInt(hoursOfOpp.slice(3, 5)) / 5;
             let endIndex = startIndex + activityTimeDivision;
             if (endIndex > totalTimeDivision) {
                 endIndex = totalTimeDivision;
             }
+            let temporaryReservationArray = reservationMatrix.get(value.idactivitySeating);
             for (let i = startIndex; i < endIndex; i++) {
-                reservationMatrix[value.idactivitySeating - 1][i] = 1;
+                temporaryReservationArray[i] = 1;
             }
+            reservationMatrix.set(value.idactivitySeating,temporaryReservationArray);
         });
 
-
+        console.log(reservationMatrix);
         for (let i = 0; i < divideTimeSearch + 3; i += 3) {
             let checkIfAlreadyChosen = false;
             let resHour;
             let index;
 
             for (let j = 0; j < seating.length; j++) {
-                if (reservationMatrix[j][i] == 0) {
-                    if (reservationMatrix[j][i + activityTimeDivision - 1] == 0) {
-                        if (reservationMatrix[j][i - 3] === 1 && i !== 0) {
-                            if (reservationMatrix[j][i - 3] == 0) {
+                let temporaryReservationArray = reservationMatrix.get(seating[j].idactivitySeating);
+                if (temporaryReservationArray[i] == 0) {
+                    if (temporaryReservationArray[i + activityTimeDivision - 1] == 0) {
+                        if (temporaryReservationArray[i - 3] === 1 && i !== 0) {
+                            if (temporaryReservationArray[i - 3] == 0) {
                                 resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 2) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 2) % 12 * 5).toString();
-                                index = j + 1;
+                                index = seating[j].idactivitySeating;
                                 checkIfAlreadyChosen = true;
                                 break;
-                            } else if (reservationMatrix[j][i - 2] == 0) {
+                            } else if (temporaryReservationArray[i - 2] == 0) {
                                 resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 1) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 1) % 12 * 5).toString();
-                                index = j + 1;
+                                index = seating[j].idactivitySeating;
                                 checkIfAlreadyChosen = true;
                                 break;
                             }
                         }
                         if (checkIfAlreadyChosen == false) {
                             resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor(i / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + i % 12 * 5).toString();
-                            index = j + 1;
+                            index = seating[j].idactivitySeating;
                             checkIfAlreadyChosen = true;
                         }
                     } else {
-                        if (reservationMatrix[j][i - 3] === 1 && i !== 0) {
-                            if (reservationMatrix[j][i - 2] == 0 && reservationMatrix[j][i + activityTimeDivision - 3] == 0) {
+                        if (temporaryReservationArray[i - 3] === 1 && i !== 0) {
+                            if (temporaryReservationArray[i - 2] == 0 && temporaryReservationArray[i + activityTimeDivision - 3] == 0) {
                                 resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 2) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 2) % 12 * 5).toString();
-                                index = j + 1;
+                                index = seating[j].idactivitySeating;
                                 checkIfAlreadyChosen = true;
                                 break;
-                            } else if (reservationMatrix[j][i - 1] == 0 && reservationMatrix[j][i + activityTimeDivision - 2] == 0) {
+                            } else if (temporaryReservationArray[i - 1] == 0 && temporaryReservationArray[i + activityTimeDivision - 2] == 0) {
                                 resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 1) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 1) % 12 * 5).toString();
-                                index = j + 1;
+                                index = seating[j].idactivitySeating;
                                 checkIfAlreadyChosen = true;
                                 break;
                             }
@@ -356,14 +360,15 @@ exports.getAvailability = async (req, res, next) => {
             let resHour;
             let index;
             for (let j = 0; j < seating.length; j++) {
-                if (reservationMatrix[j][i] == 0 && reservationMatrix[j][totalTimeDivision - 1] == 0) {
-                    if (reservationMatrix[j][i - 3] === 1 && i !== 0) {
-                        if (reservationMatrix[j][i - 2] == 0) {
+                let temporaryReservationArray = reservationMatrix.get(seating[j].idactivitySeating);
+                if (temporaryReservationArray[i] == 0 && temporaryReservationArray[totalTimeDivision - 1] == 0) {
+                    if (temporaryReservationArray[i - 3] === 1 && i !== 0) {
+                        if (temporaryReservationArray[i - 2] == 0) {
                             resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 2) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 2) % 12 * 5).toString();
                             index = j + 1;
                             checkIfAlreadyChosen = true;
                             break;
-                        } else if (reservationMatrix[j][i - 1] == 0) {
+                        } else if (temporaryReservationArray[i - 1] == 0) {
                             resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 1) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 1) % 12 * 5).toString();
                             index = j + 1;
                             checkIfAlreadyChosen = true;
