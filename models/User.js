@@ -31,13 +31,11 @@ class User {
         return newUser;
     }
 
-    async update(id) {
-        let sql = `
-        UPDATE user
-        SET name = '${this.name}', phone = '${this.phone}', email ='${this.email}'
-        WHERE iduser = ${id};`;
-
-        const [updatedUser, _] = await db.execute(sql);
+    async update(iduser, name, phone) {
+        const sql = 'UPDATE user SET name = ? , phone = ? WHERE iduser = ?';
+        const params = [name, phone, parseInt(iduser)];
+        
+        const [updatedUser, _] = await db.query(sql,params);
 
         return updatedUser;
     }

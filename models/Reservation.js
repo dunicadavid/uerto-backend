@@ -126,7 +126,7 @@ class Reservation {
 
         //console.log(totalTimeDivision,thisHourIndex,activityTimeDivision,reservations,reservationArray);
 
-        return reservationArray[thisHourIndex] === 0 && reservationArray[thisHourIndex + activityTimeDivision - 1] === 0;
+        return reservationArray[thisHourIndex] === 0 && ((reservationArray[thisHourIndex + activityTimeDivision - 1] === 0 && thisHourIndex < totalTimeDivision - activityTimeDivision)||(reservationArray[totalTimeDivision - 1] === 0 && thisHourIndex >= totalTimeDivision - activityTimeDivision ));
     }
 
     static findById(id) {

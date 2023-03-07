@@ -31,14 +31,40 @@ exports.getReservationsByUser = async (req, res, next) => {
         const iduser = req.query.iduser;
         const time = req.query.time;
 
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+
+        const results = {}
+
         console.log(iduser,time);
         const date = new Date().toJSON().slice(0, 10);
-        const hour = new Date().toLocaleString("en-US", { hour12: false }).slice(11, 16);
+        const hour = new Date().toLocaleString("en-US", { hour12: false }).slice(10, 15); ///????????????????? 10-15 sau 11-16
         console.log(iduser, time, date, hour); 
 
-        const [reservation, _ ] = await Reservation.findByUser(iduser, time, date, hour);
-        if(reservation.length !== 0) {
-            res.status(200).json({count : reservation.length,reservation});
+        const [reservations, _ ] = await Reservation.findByUser(iduser, time, date, hour);
+
+        if (endIndex < reservations.length) {
+            results.next = {
+                page: page + 1,
+                limit
+            }
+        }
+
+        if (startIndex > 0) {
+            results.previous = {
+                page: page - 1,
+                limit
+            }
+        }
+        
+        results.count = reservations.length;
+        results.results = reservations.slice(startIndex, endIndex);
+
+        if(reservations.length !== 0) {
+            res.status(200).json(results);
         } else {
             res.status(404).json({message : "There are no reservations available"});
         }

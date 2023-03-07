@@ -3,7 +3,7 @@ const User = require('../models/User');
 exports.createUser = async (req, res, next) => {
     try {
 
-        let { name, email, phone, authId } = req.body;
+        const { name, email, phone, authId } = req.body;
         let user = new User(name, email, phone, authId);
 
         user = await user.save();
@@ -24,10 +24,10 @@ exports.createUser = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
     try {
 
-        let { id, name, email, phone } = req.body;
-        let user = new User(name, email, phone);
+        const { iduser, name, phone } = req.body;
 
-        user = await user.update(id);
+        const user = new User();
+        await user.update(iduser,name,phone);
 
         res.status(201).json({ message: "User updated" });
 
@@ -46,7 +46,7 @@ exports.getUserById = async (req, res, next) => {
     console.log('aici');
     try {
         let userId = req.params.id;
-        console.log(userId)
+        console.log(userId);
         let [user, _] = await User.findById(userId);
 
         res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth });

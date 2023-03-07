@@ -304,7 +304,7 @@ exports.getAvailability = async (req, res, next) => {
             reservationMatrix.set(value.idactivitySeating,temporaryReservationArray);
         });
 
-        console.log(reservationMatrix);
+        //console.log(reservationMatrix);
         for (let i = 0; i < divideTimeSearch + 3; i += 3) {
             let checkIfAlreadyChosen = false;
             let resHour;
@@ -365,19 +365,19 @@ exports.getAvailability = async (req, res, next) => {
                     if (temporaryReservationArray[i - 3] === 1 && i !== 0) {
                         if (temporaryReservationArray[i - 2] == 0) {
                             resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 2) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 2) % 12 * 5).toString();
-                            index = j + 1;
+                            index = seating[j].idactivitySeating;
                             checkIfAlreadyChosen = true;
                             break;
                         } else if (temporaryReservationArray[i - 1] == 0) {
                             resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor((i - 1) / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + (i - 1) % 12 * 5).toString();
-                            index = j + 1;
+                            index = seating[j].idactivitySeating;
                             checkIfAlreadyChosen = true;
                             break;
                         }
                     }
                     if (checkIfAlreadyChosen == false) {
                         resHour = (parseInt(hoursOfOpp.slice(0, 2)) + Math.floor(i / 12)).toString() + ':' + (parseInt(hoursOfOpp.slice(3, 5)) + i % 12 * 5).toString();
-                        index = j + 1;
+                        index = seating[j].idactivitySeating;
                         checkIfAlreadyChosen = true;
                     }
                 }
