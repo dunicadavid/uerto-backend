@@ -223,9 +223,31 @@ exports.getPlacesByName = async (req, res, next) => {
 exports.getPlacesByFavourite = async (req, res, next) => {
     try {
         const iduser = req.params.id;
+
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const results = {}
+        
         const [places, _] = await Place.findByFavourite(iduser);
+
         if (places.length !== 0) {
-            res.status(200).json({ count: places.length, places });
+            if (endIndex < places.length) {
+                results.next = {
+                    page: page + 1,
+                    limit
+                }
+            }
+            if (startIndex > 0) {
+                results.previous = {
+                    page: page - 1,
+                    limit
+                }
+            }
+            results.count = places.length;
+            results.results = places.slice(startIndex, endIndex);
+            res.status(200).json(results);
         } else {
             res.status(404).json({ message: "There is no place in your favourites list" });
         }
