@@ -210,10 +210,33 @@ exports.getActivities = async (req, res, next) => {
 
 exports.getPlacesByName = async (req, res, next) => {
     try {
-        let placeName = req.params.name;
-        let [places, _] = await Place.findByName(placeName);
+        const placeName = req.params.name;
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
 
-        res.status(200).json({ count: places.length, places });
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const results = {}
+
+        const [places, _] = await Place.findByName(placeName);
+
+        if (endIndex < places.length) {
+            results.next = {
+                page: page + 1,
+                limit
+            }
+        }
+
+        if (startIndex > 0) {
+            results.previous = {
+                page: page - 1,
+                limit
+            }
+        }
+        results.count = places.count;
+        results.results = places.slice(startIndex, endIndex);
+
+        res.status(200).json(results);
     } catch (error) {
         console.log(error);
         next(error);
