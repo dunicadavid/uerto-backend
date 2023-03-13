@@ -26,6 +26,21 @@ exports.createReservation = async (req, res, next) => {
     }
 }
 
+exports.deleteReservation = async (req, res, next) => {
+    try {
+        const idreservation = req.query.idreservation;
+        const reservation = new Reservation();
+
+        await reservation.delete(idreservation);
+
+        res.status(200).json({ message: "Reservation deleted successfully" });
+    }
+    catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
 exports.getReservationsByUser = async (req, res, next) => {
     try {
         const iduser = req.query.iduser;

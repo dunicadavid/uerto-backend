@@ -97,6 +97,40 @@ class Reservation {
         
     }
 
+    async delete(idreservation) {
+
+        const queries = [
+            {
+                query: 'delete from activity_arrangement where reservation = ?;',
+                parameters: [idreservation]
+            },
+            {
+                query: 'delete from reservation where idreservation = ?;',
+                parameters: [idreservation]
+            }
+        ];
+
+        const connection = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            database: process.env.DB_NAME,
+            password: process.env.DB_PASSWORD,
+        });
+
+        try{
+            await connection.beginTransaction();
+            await connection.query(queries[0].query, queries[0].parameters);
+            await connection.query(queries[1].query, queries[1].parameters);
+            await connection.commit();
+            console.log('commit ' + idreservation);
+            return;
+        } catch(err) {
+            console.log('ROLLBACK');
+            connection.rollback();
+            return err.message;
+        }
+        
+    }
 
     async verifyReservationConsistancy(idactivitySeating) {
         let sql = `select hour from activity_arrangement s join reservation r on s.reservation=r.idreservation 
