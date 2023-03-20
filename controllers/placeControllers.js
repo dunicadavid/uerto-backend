@@ -349,7 +349,7 @@ exports.getAvailability = async (req, res, next) => {
             reservationMatrix.set(value.idactivitySeating,temporaryReservationArray);
         });
 
-        //console.log(reservationMatrix);
+        console.log(reservationMatrix);
         for (let i = 0; i < divideTimeSearch + 3; i += 3) {
             let checkIfAlreadyChosen = false;
             let resHour;
@@ -438,7 +438,6 @@ exports.getAvailability = async (req, res, next) => {
         next(error);
     }
 }
-
 
 exports.getRecommendation = async (req, res, next) => {
     res.status(404).json({ message: 'Not Implemented' });

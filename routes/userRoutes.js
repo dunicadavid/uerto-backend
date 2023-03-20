@@ -1,10 +1,11 @@
 const express = require('express');
 const userControllers = require('../controllers/userControllers');
 const router = express.Router();
+const middleware = require('../models/Middleware');
 
 // @route GET && POST - /users/
 router.route("/create").post(userControllers.createUser);
-router.route("/update").put(userControllers.updateUser);
+router.route("/update").put(middleware.ownUserAuthorization,userControllers.updateUser);
 router.route("/id=:id").get(userControllers.getUserById);
 router.route("/authid=:id").get(userControllers.getUserByAuthId);
 

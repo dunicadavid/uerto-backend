@@ -76,7 +76,6 @@ exports.getUserByAuthId = async (req, res, next) => {
     }
 }
 
-
 exports.ratePlace = async (req, res, next) => {
     try {
         const { iduser, idplace, idreservation, rating } = req.body;

@@ -52,6 +52,13 @@ class User {
         return db.execute(sql);
     }
 
+    static getIduserByIdauth(id) {
+        const sql = 'SELECT iduser FROM user WHERE idauth = ?;';
+        const params = [id];
+        
+        return db.query(sql,params);
+    }
+
     async makeFavourite(iduser,idplace) {
         const sql = 'INSERT INTO user_favourite_place VALUES (?,?);';
         const params = [parseInt(idplace),parseInt(iduser)];
