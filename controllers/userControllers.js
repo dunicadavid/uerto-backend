@@ -3,19 +3,20 @@ const User = require('../models/User');
 exports.createUser = async (req, res, next) => {
     try {
 
-        const { name, email, phone, authId } = req.body;
-        let user = new User(name, email, phone, authId);
+        const { name, email, phone} = req.body;
+        const idauth = req.user.uid;
+        let user = new User(name, email, phone, idauth);
 
         user = await user.save();
 
-        let [resUser, _] = await User.findByAuthId(authId);
+        let [resUser, _] = await User.findByAuthId(idauth);
 
         res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth } });
 
     } catch (error) {
         console.log(error);
         if (error.code === 'ER_DUP_ENTRY')
-            res.status(405).json({ message: "Mobile number already taken." });
+            res.status(405).json({ message: "Mobile number already taken." }); //more cases [email and idauth]
         else
             next(error);
     }
@@ -60,8 +61,8 @@ exports.getUserById = async (req, res, next) => {
 exports.getUserByAuthId = async (req, res, next) => {
     try {
 
-        let userAuthId = req.params.id;
-        let [user, _] = await User.findByAuthId(userAuthId);
+        const idauth = req.user.uid;
+        const [user, _] = await User.getUserByIdauth(idauth);
 
         if (user.length === 0) {
             res.status(204).json({ message: "No user information" });

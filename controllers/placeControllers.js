@@ -245,7 +245,7 @@ exports.getPlacesByName = async (req, res, next) => {
 
 exports.getPlacesByFavourite = async (req, res, next) => {
     try {
-        const iduser = req.params.id;
+        const iduser = req.params.iduser;
 
         const page = parseInt(req.query.page);
         const limit = parseInt(req.query.limit);

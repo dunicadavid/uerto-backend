@@ -46,10 +46,11 @@ class User {
         return db.execute(sql);
     }
 
-    static findByAuthId(id) {
-        let sql = `SELECT * FROM user where idauth = '${id}';`;
-
-        return db.execute(sql);
+    static getUserByIdauth(id) {
+        const sql = 'SELECT * FROM user where idauth = ?;';
+        const params = [id];
+        
+        return db.query(sql,params);
     }
 
     static getIduserByIdauth(id) {
