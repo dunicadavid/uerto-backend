@@ -1,4 +1,7 @@
 const Place = require('../models/Place');
+const User = require('../models/User');
+
+const {preparePlaces} = require('../recommender-system/placesFetch');
 
 const geo = require('geo-hash');
 const proximityhash = require('proximityhash');
@@ -440,5 +443,22 @@ exports.getAvailability = async (req, res, next) => {
 }
 
 exports.getRecommendation = async (req, res, next) => {
-    res.status(404).json({ message: 'Not Implemented' });
+    try {
+        let { iduser } = req.query.iduser;
+
+        const [ratings] = await User.getRatingsOfUser(iduser);
+        const [places, _] = await Place.getPlacesFilters();
+
+        const {
+            PLACES_IN_LIST,
+            X,
+          } = preparePlaces();
+
+        //const linearRegressionRecommendation = LinearRegressionStrategy(X, PLACES_IN_LIST, ratings);
+
+        res.status(200).json({places: places,ratings :ratings});
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
 }

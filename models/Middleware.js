@@ -3,23 +3,21 @@ const User = require('./User');
 
 class Middleware {
     async decodeToken(req,res,next) {
-        setTimeout(async function () {
-            try {
-                const token = req.headers.authorization.split(' ')[1];
-                const decodeValue = await admin.auth().verifyIdToken(token);
-                console.log(token);
-                if(decodeValue) {
-                    req.user = decodeValue;
-                    return next();
-                }
-                return res.json({message : 'Unauthorize.'});
-            } catch (e) {
-                if(typeof req.headers.authorization === 'undefined') {
-                    return res.json({message : 'No token provided.'});
-                }
-                return res.json({message : 'Invalid token.'});
+        try {
+            const token = req.headers.authorization.split(' ')[1];
+            const decodeValue = await admin.auth().verifyIdToken(token);
+            console.log(token);
+            if(decodeValue) {
+                req.user = decodeValue;
+                return next();
             }
-          }, 5000);
+            return res.json({message : 'Unauthorize.'});
+        } catch (e) {
+            if(typeof req.headers.authorization === 'undefined') {
+                return res.json({message : 'No token provided.'});
+            }
+            return res.json({message : 'Invalid token.'});
+        }
     }
 
     async UserAuthorization(req,res,next) {

@@ -114,6 +114,15 @@ class Place {
 
     }
 
+    static getPlacesFilters() {
+        const sql = `SELECT p.idplace , p.rating, p.price, p.geohash, p.hoursOfOpp, CONCAT(asian,
+            arabic, greek, italian, latin, streetfood, cocktail, vegan, fish, meat, desert, breakfest, 
+            fancy, reservation, night, skybar, view, nature, tv, live, quite, work, games, smoke) 
+            AS filters FROM place p INNER JOIN place_filter_restaurant f ON f.idfilterRestaurant = p.idplace;`;
+
+        return db.query(sql);
+    }
+
     static findById(id) {
         let sql = `SELECT * FROM place where idplace = ${id};`;
 

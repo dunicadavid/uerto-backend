@@ -110,6 +110,13 @@ class User {
         }
         
     }
+
+    static getRatingsOfUser(iduser) {
+        const sql = 'SELECT place, rating FROM user_rating WHERE user = ?;';
+        const params = [iduser];
+        
+        return db.query(sql,params);
+    }
 }
 
 module.exports = User;
