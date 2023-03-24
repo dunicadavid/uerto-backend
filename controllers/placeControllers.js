@@ -1,7 +1,7 @@
 const Place = require('../models/Place');
 const User = require('../models/User');
 
-const {preparePlaces} = require('../recommender-system/placesFetch');
+const { preparePlaces } = require('../recommender-system/placesFetch');
 
 const geo = require('geo-hash');
 const proximityhash = require('proximityhash');
@@ -133,7 +133,7 @@ exports.updatePlaceFilterRestaurant = async (req, res, next) => {
             queryString += value + ' = 0, ';
         });
 
-        queryString = queryString.substring(0,queryString.length - 2); 
+        queryString = queryString.substring(0, queryString.length - 2);
 
         console.log(queryString);
 
@@ -144,7 +144,7 @@ exports.updatePlaceFilterRestaurant = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         if (error.code === 'ER_BAD_FIELD_ERROR') {
-            res.status(405).json({ message: "Unknown place atribute"});
+            res.status(405).json({ message: "Unknown place atribute" });
         } else {
             next(error);
         }
@@ -164,7 +164,7 @@ exports.updatePlaceFilterLeasure = async (req, res, next) => {
             queryString += value + ' = 0, ';
         });
 
-        queryString = queryString.substring(0,queryString.length - 2); 
+        queryString = queryString.substring(0, queryString.length - 2);
 
         console.log(queryString);
 
@@ -175,7 +175,7 @@ exports.updatePlaceFilterLeasure = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         if (error.code === 'ER_BAD_FIELD_ERROR') {
-            res.status(405).json({ message: "Unknown place atribute"});
+            res.status(405).json({ message: "Unknown place atribute" });
         } else {
             next(error);
         }
@@ -255,7 +255,7 @@ exports.getPlacesByFavourite = async (req, res, next) => {
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const results = {}
-        
+
         const [places, _] = await Place.findByFavourite(iduser);
 
         if (places.length !== 0) {
@@ -336,7 +336,7 @@ exports.getAvailability = async (req, res, next) => {
         let result = [];
 
         for (let i = 0; i < seating.length; i++) {
-            reservationMatrix.set(seating[i].idactivitySeating , Array(totalTimeDivision).fill(0));
+            reservationMatrix.set(seating[i].idactivitySeating, Array(totalTimeDivision).fill(0));
         }
 
         reservations.forEach((value) => {
@@ -349,7 +349,7 @@ exports.getAvailability = async (req, res, next) => {
             for (let i = startIndex; i < endIndex; i++) {
                 temporaryReservationArray[i] = 1;
             }
-            reservationMatrix.set(value.idactivitySeating,temporaryReservationArray);
+            reservationMatrix.set(value.idactivitySeating, temporaryReservationArray);
         });
 
         console.log(reservationMatrix);
@@ -444,6 +444,7 @@ exports.getAvailability = async (req, res, next) => {
 
 exports.getRecommendation = async (req, res, next) => {
     try {
+        const start = Date.now();
         let { iduser } = req.query.iduser;
 
         const [ratings] = await User.getRatingsOfUser(iduser);
@@ -452,11 +453,14 @@ exports.getRecommendation = async (req, res, next) => {
         const {
             PLACES_IN_LIST,
             X,
-          } = preparePlaces();
+        } = preparePlaces();
 
         //const linearRegressionRecommendation = LinearRegressionStrategy(X, PLACES_IN_LIST, ratings);
 
-        res.status(200).json({places: places,ratings :ratings});
+        res.status(200).json({ places: places, ratings: ratings });
+        const end = Date.now();
+        console.log(`Execution time: ${end - start} ms`);
+        
     } catch (error) {
         console.log(error);
         next(error);
