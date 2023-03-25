@@ -112,10 +112,16 @@ class User {
     }
 
     static getRatingsOfUser(iduser) {
-        const sql = 'SELECT place, rating FROM user_rating WHERE user = ?;';
+        const sql = 'SELECT place, rating FROM user_rating WHERE user = ? ORDER BY place;';
         const params = [iduser];
         
         return db.query(sql,params);
+    }
+
+    static getAllRatings() {
+        const sql = 'SELECT user, place, rating FROM user_rating ORDER BY user;';
+        
+        return db.query(sql);
     }
 }
 

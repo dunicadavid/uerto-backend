@@ -1,10 +1,14 @@
 const Place = require('../models/Place');
 const User = require('../models/User');
-
+const { predictWithLinearRegression } = require('../recommender-system/linearRegressionStrategy');
+const { predictWithContentBased } = require('../recommender-system/contentBasedStrategy');
+const { predictWithCfItemBased, predictWithCfUserBased } = require('../recommender-system/collaborativeFilteringStrategy');
 const { preparePlaces } = require('../recommender-system/placesFetch');
+const { prepareRatingsOfUser, prepareRatings } = require('../recommender-system/ratingsFetch');
 
 const geo = require('geo-hash');
 const proximityhash = require('proximityhash');
+
 
 exports.getAllPlaces = async (req, res, next) => {
     try {
@@ -445,22 +449,53 @@ exports.getAvailability = async (req, res, next) => {
 exports.getRecommendation = async (req, res, next) => {
     try {
         const start = Date.now();
-        let { iduser } = req.query.iduser;
-
-        const [ratings] = await User.getRatingsOfUser(iduser);
-        const [places, _] = await Place.getPlacesFilters();
+        const iduser  = req.query.iduser;
+        const idplace = parseInt(req.query.idplace) || 0;
 
         const {
             PLACES_IN_LIST,
             X,
-        } = preparePlaces();
+        } = await preparePlaces();
 
-        //const linearRegressionRecommendation = LinearRegressionStrategy(X, PLACES_IN_LIST, ratings);
+        const RATINGS_OF_USER = await prepareRatingsOfUser(iduser);
 
-        res.status(200).json({ places: places, ratings: ratings });
+        const {
+            ratingsGroupedByUser,
+            ratingsGroupedByPlace,
+          } = await prepareRatings();
+
+        const linearRegressionRecommendation = predictWithLinearRegression(X, PLACES_IN_LIST, RATINGS_OF_USER);
+
+        const contentBasedRecommendation = predictWithContentBased(X, PLACES_IN_LIST, idplace);
+
+        const cfUserBasedRecommendation = predictWithCfUserBased(
+            ratingsGroupedByUser,
+            ratingsGroupedByPlace,
+            iduser
+          );
+
+          const cfItemBasedRecommendation = predictWithCfItemBased(
+            ratingsGroupedByUser,
+            ratingsGroupedByPlace,
+            iduser
+          );
+
+        console.log('linear regression:');
+        console.log(linearRegressionRecommendation);
+
+        console.log('content based on id X:');
+        console.log(contentBasedRecommendation);
+
+        console.log('colaborative user:');
+        console.log(cfUserBasedRecommendation);
+
+        console.log('colaborative item:');
+        console.log(cfItemBasedRecommendation);
+
+        res.status(200).json({message: 'Successfull'});
         const end = Date.now();
         console.log(`Execution time: ${end - start} ms`);
-        
+
     } catch (error) {
         console.log(error);
         next(error);

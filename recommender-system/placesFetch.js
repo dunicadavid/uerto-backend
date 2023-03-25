@@ -2,6 +2,7 @@ const GeohashDistance = require('geohash-distance');
 const Place = require('../models/Place');
 
 exports.preparePlaces = async () => {
+    let result = {};
 
     console.log('(0) Fetching data');
     const [places, _] = await Place.getPlacesFilters();
@@ -12,20 +13,16 @@ exports.preparePlaces = async () => {
     console.log('(2) Calculating Coefficients');
     let { means, ranges } = getCoefficients(X);
 
-    console.log(means, ranges);
-
     console.log('(3) Synthesizing Features');
     X = synthesizeFeatures(X, means, [0, 1, 2, 3, 4, 5, 6]);
 
     console.log('(4) Scaling Features \n');
     X = scaleFeatures(X, means, ranges);
 
-    console.log(X);
+    result.PLACES_IN_LIST = places;
+    result.X = X;
 
-    return {
-        places,
-        X,
-    };
+    return result;
 }
 
 function toFeaturizedPlaces() {
