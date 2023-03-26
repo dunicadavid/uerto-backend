@@ -32,16 +32,24 @@ app.use((err, req, res, next) => {
 
 
 //  !!delete cluster when in production
-if (cluster.isMaster) {
-    console.log(`Server running on PORT 3000`);
-    const NUM_WORKERS = os.cpus(). length;
-    for( let i = 0 ; i < NUM_WORKERS; i++) {
-        cluster.fork();
-    }
-} else {
-    const PORT = process.env.PORT || 3000;
-    https.createServer({
-        key: fs.readFileSync('key.pem'),
-        cert: fs.readFileSync('cert.pem'),
-    }, app).listen(PORT, () => {});
-}
+// if (cluster.isMaster) {
+//     console.log(`Server running on PORT 3000`);
+//     const NUM_WORKERS = os.cpus(). length;
+//     for( let i = 0 ; i < NUM_WORKERS; i++) {
+//         cluster.fork();
+//     }
+// } else {
+//     const PORT = process.env.PORT || 3000;
+//     https.createServer({
+//         key: fs.readFileSync('key.pem'),
+//         cert: fs.readFileSync('cert.pem'),
+//     }, app).listen(PORT, () => {});
+// }
+
+const PORT = process.env.PORT || 3000;
+https.createServer({
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem'),
+}, app).listen(PORT, () => {
+    console.log(`Server running on PORT ${PORT}`);
+});

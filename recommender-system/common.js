@@ -6,7 +6,7 @@ exports.sortByScore = (recommendation) => {
 
 exports.getCosineSimilarityRowVector = (matrix, index) => {
     return matrix.map((rowRelative, i) => {
-      return similarity(matrix[index], matrix[i]);
+      return similarity(matrix[index], matrix[i]) || 0;
     });
 }
 

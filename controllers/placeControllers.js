@@ -475,10 +475,10 @@ exports.getRecommendation = async (req, res, next) => {
           );
 
           const cfItemBasedRecommendation = predictWithCfItemBased(
-            ratingsGroupedByUser,
-            ratingsGroupedByPlace,
-            iduser
-          );
+           ratingsGroupedByUser,
+           ratingsGroupedByPlace,
+           iduser
+         );
 
         console.log('linear regression:');
         console.log(linearRegressionRecommendation);

@@ -6,11 +6,14 @@ exports.predictWithCfUserBased = (ratingsGroupedByUser, ratingsGroupedByPlace, u
     const { matrix, placeIds, userIndex } = userItem;
 
     const matrixNormalized = meanNormalizeByRowVector(matrix);
+
     const userRatingsRowVector = matrixNormalized[userIndex];
+    console.log(matrixNormalized);
 
     const cosineSimilarityRowVector = getCosineSimilarityRowVector(matrixNormalized, userIndex);
+    console.log(cosineSimilarityRowVector);
 
-    const predictedRatings = userRatingsRowVector.map((rating, placeIndex) => {
+    const predictedRatings = userRatingsRowVector.map((rating, placeIndex) => {     //am ramas aici
         const placeId = placeIds[placeIndex];
 
         const placeRatingsRowVector = getPlaceRatingsRowVector(matrixNormalized, placeIndex);
@@ -21,7 +24,6 @@ exports.predictWithCfUserBased = (ratingsGroupedByUser, ratingsGroupedByPlace, u
         } else {
             score = rating
         }
-
         return { score, placeId };
     });
 
@@ -60,7 +62,9 @@ exports.predictWithCfItemBased = (ratingsGroupedByUser, ratingsGroupedByPlace, u
 
 
 function getPredictedRating (ratingsRowVector, cosineSimilarityRowVector) {
+
     const N = 5;
+
     const neighborSelection = cosineSimilarityRowVector
         // keep track of rating and similarity
         .map((similarity, index) => ({ similarity, rating: ratingsRowVector[index] }))
@@ -70,6 +74,7 @@ function getPredictedRating (ratingsRowVector, cosineSimilarityRowVector) {
         .sort((a, b) => b.similarity - a.similarity)
         // N neighbors
         .slice(0, N);
+  
 
     const numerator = neighborSelection.reduce((result, value) => {
         return result + value.similarity * value.rating;
@@ -79,7 +84,7 @@ function getPredictedRating (ratingsRowVector, cosineSimilarityRowVector) {
         return result + math.pow(value.similarity, 2);
     }, 0);
 
-    return numerator / math.sqrt(denominator);
+    return numerator / math.sqrt(denominator) || 0;
 }
 
 function getUserRatingsRowVector (itemBasedMatrix, userIndex) {
