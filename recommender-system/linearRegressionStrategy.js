@@ -4,7 +4,7 @@ const math = require('mathjs');
 const LEARNING_RATE = 0.03;
 const LEARNING_ITERATIONS = 750;
 
-exports.predictWithLinearRegression  = async (X, MOVIES_IN_LIST, ratings) =>  {
+exports.predictWithLinearRegression  = async (X, PLACES_IN_LIST, ratings) =>  {
   // Add intercept term
   const ones = Array(X.length).fill().map((v, i) => [1]);
   X = math.concat(ones, X);
@@ -23,14 +23,14 @@ exports.predictWithLinearRegression  = async (X, MOVIES_IN_LIST, ratings) =>  {
   };
 
   // Prepare training and test set
-  const { training, test } = MOVIES_IN_LIST.reduce((result, movie, key) => {
+  const { training, test } = PLACES_IN_LIST.reduce((result, movie, key) => {
     const hasRatedMovie = !!ratings[movie.idplace];
     if (hasRatedMovie) {
       result.training.X.push(X[key]);
       result.training.y.push([ratings[movie.idplace].rating]);
     } else {
       result.test.X.push(X[key]);
-      // Keep a reference to map the predictions later to movies
+      // Keep a reference to map the predictions later to places
       result.test.references.push(movie.idplace);
     }
     return result;

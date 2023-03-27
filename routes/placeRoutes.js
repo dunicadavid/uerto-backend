@@ -21,7 +21,7 @@ router.route("/search=:name").get(placeControllers.getPlacesByName);
 router.route("/favourites-of-user=:iduser").get(middleware.UserAuthorization, placeControllers.getPlacesByFavourite);
 router.route("/id=:id/activity").get(placeControllers.getActivities);
 router.route("/availability").get(placeControllers.getAvailability);
-router.route("/recommend").get(middleware.UserAuthorization, placeControllers.getRecommendation); //not implemented
+router.route("/recommend").get(middleware.UserAuthorization, placeControllers.getRecommendation); 
 
 
 module.exports = router;
