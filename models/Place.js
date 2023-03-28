@@ -13,26 +13,10 @@ class Place {
     }
 
     async save() {
-        let sql = `
-        INSERT INTO place(
-            name,
-            category,
-            location,
-            latitude,
-            longitude,
-            geohash,
-            hoursOfOpp)
-        VALUES(
-            '${this.name}',
-            '${this.category}',
-            '${this.location}',
-            '${this.latitude}',
-            '${this.longitude}',
-            '${this.geohash}',
-            '${this.hourOfOpp}'
-        );`;
+        const sql = 'INSERT INTO place( name, category, location, latitude, longitude, geohash, hoursOfOpp) VALUES(?,?,?,?,?,?,?);';
+        const params = [this.name,this.category,this.location,this.latitude,this.longitude,this.geohash,this.hourOfOpp];
 
-        const [newPlace, _] = await db.execute(sql);
+        const [newPlace, _] = await db.query(sql,params);
 
         return newPlace;
     }
@@ -55,6 +39,7 @@ class Place {
         return updateLocationPlace;
     }
 
+    //vezi sql injection
     async updateFilterRestaurant(idplace,queryString) {
         const sql = `UPDATE uerto.place_filter_restaurant SET ${queryString} WHERE idfilterRestaurant = (SELECT filterRestaurant FROM uerto.place WHERE idplace = ? LIMIT 1);`;
         const params = [idplace];
@@ -63,7 +48,7 @@ class Place {
 
         return updateFilterPlace;
     }
-
+    //vezi sql injection
     async updateFilterLeasure(idplace,queryString) {
         const sql = `UPDATE uerto.place_filter_leasure SET ${queryString} WHERE idfilterLeasure = (SELECT filterLeasure FROM uerto.place WHERE idplace = ? LIMIT 1);`;
         const params = [idplace];
@@ -72,7 +57,7 @@ class Place {
 
         return updateFilterPlace;
     }
-
+    //vezi sql injection
     static findAll(filter, proximityGeohashes, type, sortedBy) {            
         let sql;
         let whereClauseActive = false;
@@ -123,16 +108,18 @@ class Place {
         return db.query(sql);
     }
 
-    static findById(id) {
-        let sql = `SELECT * FROM place where idplace = ${id};`;
+    static findById(idplace) {
+        const sql = 'SELECT * FROM place WHERE idplace = ?;';
+        const param = [idplace];
 
-        return db.execute(sql);
+        return db.query(sql,param);
     }
 
     static findByName(name) {
-        let sql = `select * from uerto.place where UPPER(name) LIKE '%${name}%';`;
+        const sql = "SELECT * FROM uerto.place WHERE UPPER(name) LIKE '%?%';";
+        const param = [name];
 
-        return db.execute(sql);
+        return db.query(sql,param);
     }
 
     static favouriteCheck(iduser,idplace) {
@@ -143,58 +130,54 @@ class Place {
     }
 
     static findByFavourite(iduser) {
-        const sql = `select idplace,name,category,location from uerto.place p JOIN uerto.user_favourite_place f ON p.idplace = f.place WHERE user = ?;`;
+        const sql = `SELECT idplace,name,category,location FROM uerto.place p JOIN uerto.user_favourite_place f ON p.idplace = f.place WHERE user = ?;`;
         const param = [iduser];
 
         return db.query(sql,param);
     }
 
-    static activities(id) {
-        let sql = `SELECT * FROM activity where place = ${id};`;
+    static activities(idplace) {
+        const sql = 'SELECT * FROM activity where place = ?;';
+        const param = [idplace];
 
-        return db.execute(sql);
+        return db.query(sql,param);
     }
 
-    static availability(date, id, partySize) {
-        let sql = `select hour, idactivitySeating from activity_seating s join activity_arrangement a 
-        on a.activitySeating = s.idactivitySeating 
-        join reservation r on a.reservation=r.idreservation where r.date = '${date}' AND s.activity = ${id} AND s.capacity >= ${partySize};`;
+    static availability(date, idactivity, partySize) {
+        const sql = 'SELECT hour, idactivitySeating FROM activity_seating s JOIN activity_arrangement a ON a.activitySeating = s.idactivitySeating JOIN reservation r ON a.reservation=r.idreservation WHERE r.date = ? AND s.activity = ? AND s.capacity >= ?;';
+        const param = [date,idactivity, partySize];
 
-        return db.execute(sql);
+        return db.query(sql,param);
     }
 
-    static seating(id, partySize) {
-        let sql = `select * from activity_seating where activity = ${id} AND capacity >= ${partySize} ORDER BY capacity ASC;`;
+    static seating(idactivity, partySize) {
+        const sql = 'SELECT * FROM activity_seating WHERE activity = ? AND capacity >= ? ORDER BY capacity ASC;';
+        const param = [idactivity, partySize];
 
-        return db.execute(sql);
+        return db.query(sql,param);
     }
 
-    static activityInfo(id) {
-        let sql = `select hoursOfOpp, reservationTime from activity where idactivity = ${id};`;
+    static activityInfo(idactivity) {
+        const sql = 'SELECT hoursOfOpp, reservationTime FROM activity WHERE idactivity = ?;';
+        const param = [idactivity];
 
-        return db.execute(sql);
+        return db.query(sql,param);
     }
 
-    async block(placeId, userId) {
-        let sql = `
-        INSERT INTO place_blocked_users(
-            place,
-            user)
-        VALUES(
-            ${placeId},
-            ${userId}
-        );`;
+    async block(idplace, iduser) {
+        const sql = `INSERT INTO place_blocked_users(place, user) VALUES(?,?);`;
+        const params = [idplace,iduser];
 
-        const [newBlock, _] = await db.execute(sql);
+        const [newBlock, _] = await db.query(sql,params);
 
         return newBlock;
     }
 
-    async unblock(placeId, userId) {
-        let sql = `
-        DELETE FROM place_blocked_users WHERE place = ${placeId} AND user = ${userId};`;
+    async unblock(idplace, iduser) {
+        const sql = `DELETE FROM place_blocked_users WHERE place = ? AND user = ?;`;
+        const params = [idplace,iduser];
 
-        const [newUnblock, _] = await db.execute(sql);
+        const [newUnblock, _] = await db.query(sql,params);
 
         return newUnblock;
     }
