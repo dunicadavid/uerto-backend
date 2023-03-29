@@ -133,13 +133,20 @@ class Reservation {
     }
 
     async verifyReservationConsistancy(idactivitySeating) {
-        let sql = `select hour from activity_arrangement s join reservation r on s.reservation=r.idreservation 
-        where r.date = '${this.date}' AND s.activitySeating = '${idactivitySeating}';`;
+        const queries = [
+            {
+                query: 'SELECT hour FROM activity_arrangement s JOIN reservation r ON s.reservation=r.idreservation WHERE r.date = ? AND s.activitySeating = ?;',
+                parameters: [this.date,idactivitySeating]
+            },
+            {
+                query: 'SELECT hoursOfOpp, reservationTime FROM activity WHERE idactivity = ?;',
+                parameters: [this.idactivity]
+            }
+        ];
 
-        const [reservations, _] = await db.execute(sql);
+        const [reservations, _] = await db.query(queries[0].query, queries[0].parameters);
+        const [activityInfo,] = await db.query(queries[1].query, queries[1].parameters);
 
-        sql = `select hoursOfOpp, reservationTime from activity where idactivity = ${this.idactivity};`;
-        const [activityInfo,] = await db.execute(sql);
         let { hoursOfOpp, reservationTime } = activityInfo[0];
 
         let activityTimeDivision = reservationTime / 5;
@@ -163,23 +170,23 @@ class Reservation {
         return reservationArray[thisHourIndex] === 0 && ((reservationArray[thisHourIndex + activityTimeDivision - 1] === 0 && thisHourIndex < totalTimeDivision - activityTimeDivision)||(reservationArray[totalTimeDivision - 1] === 0 && thisHourIndex >= totalTimeDivision - activityTimeDivision ));
     }
 
-    static findById(id) {
-        let sql = `SELECT * FROM reservation where idreservation = ${id};`;
+    static findById(idreservation) {
+        const sql = `SELECT * FROM reservation WHERE idreservation = ?;`;
+        const params = [idreservation];
 
-        return db.execute(sql);
+
+        return db.query(sql, params);
     }
 
     static findByUser(iduser, time, date, hour) {
         if(time === 'previous') {
-            const sql = `select * from reservation where customer = ${iduser} AND date < '${date}'
-            union 
-            select * from reservation where customer = ${iduser} AND date = '${date}' AND hour < '${hour}'`;
-            return db.execute(sql);
+            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date < ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour < ?';
+            const params = [iduser,date,iduser,date,hour];
+            return db.query(sql, params);
         } else if (time === 'future') {
-            const sql = `select * from reservation where customer = ${iduser} AND date > '${date}'
-            union 
-            select * from reservation where customer = ${iduser} AND date = '${date}' AND hour > '${hour}'`;
-            return db.execute(sql);
+            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date > ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour > ?';
+            const params = [iduser,date,iduser,date,hour];
+            return db.query(sql, params);
         }
 
     }

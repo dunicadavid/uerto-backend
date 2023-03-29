@@ -12,21 +12,10 @@ class User {
     }
 
     async save() {
-        let sql = `
-        INSERT INTO user(
-            name,
-            phone,
-            email,
-            idauth
-        )
-        VALUES(
-            '${this.name}',
-            '${this.phone}',
-            '${this.email}',
-            '${this.authId}'
-        );`;
+        const sql = 'INSERT INTO user(name,phone,email,idauth) VALUES(?,?,?,?);';
+        const params = [this.name,this.phone,this.email,this.authId];
 
-        const [newUser, _] = await db.execute(sql);
+        const [newUser, _] = await db.query(sql,params);
 
         return newUser;
     }
@@ -41,9 +30,10 @@ class User {
     }
 
     static findById(id) {
-        let sql = `SELECT * FROM user where iduser = ${id};`;
+        const sql = `SELECT * FROM user where iduser = ?;`;
+        const params = [id];
 
-        return db.execute(sql);
+        return db.query(sql,params);
     }
 
     static getUserByIdauth(id) {
