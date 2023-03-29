@@ -99,6 +99,13 @@ class Place {
 
     }
 
+    static findGroupById(idplaceList) {
+        const sql = 'SELECT * FROM place WHERE idplace IN (?,?,?);';
+        const param = [...idplaceList];
+
+        return db.query(sql,param);
+    }
+
     static getPlacesFilters() {
         const sql = `SELECT p.idplace , p.rating, p.price, p.geohash, p.hoursOfOpp, CONCAT(asian,
             arabic, greek, italian, latin, streetfood, cocktail, vegan, fish, meat, desert, breakfest, 

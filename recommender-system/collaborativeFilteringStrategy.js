@@ -8,10 +8,8 @@ exports.predictWithCfUserBased = (ratingsGroupedByUser, ratingsGroupedByPlace, u
     const matrixNormalized = meanNormalizeByRowVector(matrix);
 
     const userRatingsRowVector = matrixNormalized[userIndex];
-    console.log(matrixNormalized);
 
     const cosineSimilarityRowVector = getCosineSimilarityRowVector(matrixNormalized, userIndex);
-    console.log(cosineSimilarityRowVector);
 
     const predictedRatings = userRatingsRowVector.map((rating, placeIndex) => {     //am ramas aici
         const placeId = placeIds[placeIndex];
@@ -24,7 +22,7 @@ exports.predictWithCfUserBased = (ratingsGroupedByUser, ratingsGroupedByPlace, u
         } else {
             score = rating
         }
-        return { score, placeId };
+        return { score, idplace: placeId };
     });
 
     return sortByScore(predictedRatings);
@@ -52,7 +50,7 @@ exports.predictWithCfItemBased = (ratingsGroupedByUser, ratingsGroupedByPlace, u
             score = rating;
         }
 
-        return { score, placeId };
+        return { score, idplace: placeId };
     });
 
     return sortByScore(predictedRatings);

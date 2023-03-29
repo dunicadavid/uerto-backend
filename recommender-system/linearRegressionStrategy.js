@@ -4,7 +4,7 @@ const math = require('mathjs');
 const LEARNING_RATE = 0.03;
 const LEARNING_ITERATIONS = 750;
 
-exports.predictWithLinearRegression  = async (X, PLACES_IN_LIST, ratings) =>  {
+exports.predictWithLinearRegression  = (X, PLACES_IN_LIST, ratings) =>  {
   // Add intercept term
   const ones = Array(X.length).fill().map((v, i) => [1]);
   X = math.concat(ones, X);
@@ -55,7 +55,7 @@ exports.predictWithLinearRegression  = async (X, PLACES_IN_LIST, ratings) =>  {
   // Use references from before which we kept track of
   predictedRatings = predictedRatings.map((rating, key) => ({
     score: rating[0],
-    movieId: test.references[key],
+    idplace: test.references[key],
   }));
 
   return sortByScore(predictedRatings);

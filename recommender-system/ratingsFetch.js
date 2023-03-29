@@ -3,7 +3,6 @@ const User = require('../models/User');
 
 exports.prepareRatingsOfUser = async (iduser) => {
 
-    console.log('(5) Fetching users ratings');
     const [ratings, _] = await User.getRatingsOfUser(iduser);
     let ratingsGroupedByUser = {};
 
@@ -16,7 +15,6 @@ exports.prepareRatingsOfUser = async (iduser) => {
 
 exports.prepareRatings = async () => {
 
-    console.log('(6) Fetching all ratings');
     const [ratings, _] = await User.getAllRatings();
     
     let result = {};

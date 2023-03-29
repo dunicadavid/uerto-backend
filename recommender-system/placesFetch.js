@@ -4,19 +4,14 @@ const Place = require('../models/Place');
 exports.preparePlaces = async () => {
     let result = {};
 
-    console.log('(0) Fetching data');
     const [places, _] = await Place.getPlacesFilters();
 
-    console.log('(1) Extracting Features');
     let X = places.map(toFeaturizedPlaces());
 
-    console.log('(2) Calculating Coefficients');
     let { means, ranges } = getCoefficients(X);
 
-    console.log('(3) Synthesizing Features');
     X = synthesizeFeatures(X, means, [0, 1, 2, 3, 4, 5, 6]);
 
-    console.log('(4) Scaling Features \n');
     X = scaleFeatures(X, means, ranges);
 
     result.PLACES_IN_LIST = places;
@@ -128,3 +123,14 @@ function synthesizeFeatures(X, means, featureIndexes) {
         });
     });
 }
+
+exports.sliceAndDice = (recommendations, MOVIES_BY_ID, count, onlyTitle) => {
+    recommendations = recommendations.filter(recommendation => MOVIES_BY_ID[recommendation.placeId]);
+  
+    recommendations = onlyTitle
+      ? recommendations.map(mr => ({ title: MOVIES_BY_ID[mr.placeId].title, score: mr.score }))
+      : recommendations.map(mr => ({ place: MOVIES_BY_ID[mr.placeId], score: mr.score }));
+  
+    return recommendations
+      .slice(0, count);
+  }

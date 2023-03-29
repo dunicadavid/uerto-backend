@@ -448,51 +448,68 @@ exports.getAvailability = async (req, res, next) => {
 
 exports.getRecommendation = async (req, res, next) => {
     try {
+        //strategy -> { [0]KNOWLEDGE-based , [1]LINEAR-regresion , [2]CONTENT-based , [3]COLLABORATIVE-filtering } 
         const start = Date.now();
-        const iduser  = req.query.iduser;
+        const iduser = req.query.iduser;
+        const strategy = parseInt(req.query.strategy);
         const idplace = parseInt(req.query.idplace) || 0;
 
-        const {
-            PLACES_IN_LIST,
-            X,
-        } = await preparePlaces();
+        if (strategy === 0 || strategy === 3) {
+            //collaborative filtering strategy
+            const {
+                ratingsGroupedByUser,
+                ratingsGroupedByPlace,
+            } = await prepareRatings();
 
-        const RATINGS_OF_USER = await prepareRatingsOfUser(iduser);
+            const cfUserBasedRecommendation = predictWithCfUserBased(
+                ratingsGroupedByUser,
+                ratingsGroupedByPlace,
+                iduser
+            );
 
-        const {
-            ratingsGroupedByUser,
-            ratingsGroupedByPlace,
-          } = await prepareRatings();
+            const ids = [cfUserBasedRecommendation[0].idplace, cfUserBasedRecommendation[1].idplace, cfUserBasedRecommendation[2].idplace];
 
-        const linearRegressionRecommendation = predictWithLinearRegression(X, PLACES_IN_LIST, RATINGS_OF_USER);
+            const [places, _] = await Place.findGroupById(ids);
+            res.status(200).json({ message: 'Successfull', places: places });
 
-        const contentBasedRecommendation = predictWithContentBased(X, PLACES_IN_LIST, idplace);
+            console.log('colaborative user:');
+            console.log(cfUserBasedRecommendation);
+        } else if (strategy === 1) {
+            //linear regresion strategy
+            const {
+                PLACES_IN_LIST,
+                X,
+            } = await preparePlaces();
 
-        const cfUserBasedRecommendation = predictWithCfUserBased(
-            ratingsGroupedByUser,
-            ratingsGroupedByPlace,
-            iduser
-          );
+            const RATINGS_OF_USER = await prepareRatingsOfUser(iduser);
 
-          const cfItemBasedRecommendation = predictWithCfItemBased(
-           ratingsGroupedByUser,
-           ratingsGroupedByPlace,
-           iduser
-         );
+            const linearRegressionRecommendation = predictWithLinearRegression(X, PLACES_IN_LIST, RATINGS_OF_USER);
 
-        console.log('linear regression:');
-        console.log(linearRegressionRecommendation);
+            const ids = [linearRegressionRecommendation[0].idplace, linearRegressionRecommendation[1].idplace, linearRegressionRecommendation[2].idplace];
 
-        console.log('content based on id X:');
-        console.log(contentBasedRecommendation);
+            const [places, _] = await Place.findGroupById(ids);
+            res.status(200).json({ message: 'Successfull', places: places });
 
-        console.log('colaborative user:');
-        console.log(cfUserBasedRecommendation);
+            console.log('linear regression:');
+            console.log(linearRegressionRecommendation);
+        } else if (strategy === 2) {
+            //contentbased filtering strategy
+            const {
+                PLACES_IN_LIST,
+                X,
+            } = await preparePlaces();
 
-        console.log('colaborative item:');
-        console.log(cfItemBasedRecommendation);
+            const contentBasedRecommendation = predictWithContentBased(X, PLACES_IN_LIST, idplace);
 
-        res.status(200).json({message: 'Successfull'});
+            const ids = [contentBasedRecommendation[1].idplace,contentBasedRecommendation[2].idplace,contentBasedRecommendation[3].idplace];
+
+            const [places, _] = await Place.findGroupById(ids);
+            res.status(200).json({ message: 'Successfull', places: places });
+
+            console.log('content based on id X:');
+            console.log(contentBasedRecommendation);
+        }
+
         const end = Date.now();
         console.log(`Execution time: ${end - start} ms`);
 
