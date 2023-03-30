@@ -50,7 +50,7 @@ exports.getUserById = async (req, res, next) => {
         console.log(userId);
         let [user, _] = await User.findById(userId);
 
-        res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth });
+        res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, nextStrategy : user[0].nextStrategy });
 
     } catch (error) {
         console.log(error);
@@ -67,8 +67,8 @@ exports.getUserByAuthId = async (req, res, next) => {
         if (user.length === 0) {
             res.status(204).json({ message: "No user information" });
         } else {
-            console.log({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth });
-            res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth });
+            console.log({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth , nextStrategy : user[0].nextStrategy});
+            res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth , nextStrategy : user[0].nextStrategy});
         }
 
     } catch (error) {

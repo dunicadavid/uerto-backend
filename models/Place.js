@@ -61,7 +61,7 @@ class Place {
     static findAll(filter, proximityGeohashes, type, sortedBy) {            
         let sql;
         let whereClauseActive = false;
-        sql = `SELECT idplace,name,category,location FROM place`;
+        sql = `SELECT idplace,name,category,location,geohash FROM place`;
 
         if (filter != '0') {
             sql = sql + ` join place_filter_restaurant ON filterRestaurant = idfilterRestaurant WHERE category='${type}' AND ${filter}=1`;
@@ -123,8 +123,8 @@ class Place {
     }
 
     static findByName(name) {
-        const sql = "SELECT * FROM uerto.place WHERE UPPER(name) LIKE '%?%';";
-        const param = [name];
+        const sql = "SELECT * FROM uerto.place WHERE UPPER(name) LIKE ?;";
+        const param = ['%'+name+'%'];
 
         return db.query(sql,param);
     }
