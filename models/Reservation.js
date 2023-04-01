@@ -89,9 +89,11 @@ class Reservation {
             await connection.query(queries[0].query, queries[0].parameters);
             await connection.query(queries[1].query, queries[1].parameters);
             await connection.commit();
+            connection.destroy();
             return;
         } catch(err) {
             connection.rollback();
+            connection.destroy();
             return err.message;
         }
         
@@ -122,11 +124,13 @@ class Reservation {
             await connection.query(queries[0].query, queries[0].parameters);
             await connection.query(queries[1].query, queries[1].parameters);
             await connection.commit();
+            connection.destroy();
             console.log('commit ' + idreservation);
             return;
         } catch(err) {
             console.log('ROLLBACK');
             connection.rollback();
+            connection.destroy();
             return err.message;
         }
         

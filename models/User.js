@@ -93,9 +93,11 @@ class User {
             await connection.query(queries[0].query, queries[0].parameters);
             await connection.query(queries[1].query, queries[1].parameters);
             await connection.commit();
+            connection.destroy();
             return;
         } catch(err) {
             connection.rollback();
+            connection.destroy();
             return err.message;
         }
         
