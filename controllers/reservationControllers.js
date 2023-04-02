@@ -1,4 +1,5 @@
 const Reservation = require('../models/Reservation');
+const schedule = require('node-schedule');
 
 exports.createReservation = async (req, res, next) => {
     try {
@@ -9,6 +10,12 @@ exports.createReservation = async (req, res, next) => {
 
             const err = await reservation.save(idactivitySeating);
             if(!err) {
+                const date = new Date(2023,3,2,16,20,parseInt(hour.split(':')[1])).toLocaleString('eu-RO'); //invalid
+                console.log(date,hour.substring(3,3));
+                const job = schedule.scheduleJob (date, () => {
+                    console.log(`task completed ${hour} ${idactivity}`);
+                    job.cancel();
+                });
                 res.status(201).json({message : "Reservaion created"});
             } else {
                 res.status(500).json({message : err});
