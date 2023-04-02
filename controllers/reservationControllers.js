@@ -8,17 +8,20 @@ exports.createReservation = async (req, res, next) => {
 
         if (await reservation.verifyReservationConsistancy(idactivitySeating)) {
 
-            const err = await reservation.save(idactivitySeating);
-            if(!err) {
-                const date = new Date(2023,3,2,16,20,parseInt(hour.split(':')[1])).toLocaleString('eu-RO'); //invalid
-                console.log(date,hour.substring(3,3));
-                const job = schedule.scheduleJob (date, () => {
+            const result = await reservation.save(idactivitySeating);
+            const index = result[0][0]['LAST_INSERT_ID()'];
+            console.log(result);
+            if(!isNaN(index)) {
+                const setDate = new Date(parseInt(date.split('-')[0]),parseInt(date.split('-')[1])-1,parseInt(date.split('-')[2]),parseInt(hour.split(':')[0]),parseInt(hour.split(':')[1]),0).toLocaleString('eu-RO');
+                console.log(setDate);
+                const job = schedule.scheduleJob (setDate, () => {
+                    Reservation.updateReservationStatus(index,'on going');
                     console.log(`task completed ${hour} ${idactivity}`);
                     job.cancel();
                 });
                 res.status(201).json({message : "Reservaion created"});
             } else {
-                res.status(500).json({message : err});
+                res.status(500).json({message : result});
             }
             
 

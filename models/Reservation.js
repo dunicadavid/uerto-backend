@@ -74,6 +74,9 @@ class Reservation {
             {
                 query: 'INSERT INTO uerto.activity_arrangement (reservation, activitySeating) values (LAST_INSERT_ID(),?);',
                 parameters: [idactivity_seating]
+            },
+            {
+                query: 'SELECT LAST_INSERT_ID();'
             }
         ];
 
@@ -88,9 +91,10 @@ class Reservation {
             await connection.beginTransaction();
             await connection.query(queries[0].query, queries[0].parameters);
             await connection.query(queries[1].query, queries[1].parameters);
+            const index = await connection.query(queries[2].query);
             await connection.commit();
             connection.destroy();
-            return;
+            return index;
         } catch(err) {
             connection.rollback();
             connection.destroy();
@@ -184,15 +188,21 @@ class Reservation {
 
     static findByUser(iduser, time, date, hour) {
         if(time === 'previous') {
-            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date < ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour < ?';
+            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date < ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour < ?;';
             const params = [iduser,date,iduser,date,hour];
             return db.query(sql, params);
         } else if (time === 'future') {
-            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date > ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour > ?';
+            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date > ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour > ?;';
             const params = [iduser,date,iduser,date,hour];
             return db.query(sql, params);
         }
 
+    }
+
+    static updateReservationStatus(idreservation, status) {
+            const sql = 'UPDATE reservation SET status = ? WHERE idreservation = ?;';
+            const params = [status, idreservation];
+            return db.query(sql, params);
     }
 }
 
