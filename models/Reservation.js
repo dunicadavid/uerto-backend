@@ -76,7 +76,8 @@ class Reservation {
                 parameters: [idactivity_seating]
             },
             {
-                query: 'SELECT LAST_INSERT_ID();'
+                query: 'SELECT LAST_INSERT_ID(), reservationTime FROM activity where idactivity = ?;',
+                parameters: [this.idactivity]
             }
         ];
 
@@ -91,7 +92,7 @@ class Reservation {
             await connection.beginTransaction();
             await connection.query(queries[0].query, queries[0].parameters);
             await connection.query(queries[1].query, queries[1].parameters);
-            const index = await connection.query(queries[2].query);
+            const index = await connection.query(queries[2].query, queries[2].parameters);
             await connection.commit();
             connection.destroy();
             return index;

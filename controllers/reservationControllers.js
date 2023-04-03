@@ -1,4 +1,5 @@
 const Reservation = require('../models/Reservation');
+const User = require('../models/User');
 const schedule = require('node-schedule');
 
 exports.createReservation = async (req, res, next) => {
@@ -10,13 +11,21 @@ exports.createReservation = async (req, res, next) => {
 
             const result = await reservation.save(idactivitySeating);
             const index = result[0][0]['LAST_INSERT_ID()'];
-            console.log(result);
+
             if(!isNaN(index)) {
-                const setDate = new Date(parseInt(date.split('-')[0]),parseInt(date.split('-')[1])-1,parseInt(date.split('-')[2]),parseInt(hour.split(':')[0]),parseInt(hour.split(':')[1]),0).toLocaleString('eu-RO');
-                console.log(setDate);
+                let setDate = new Date(`${date}T${hour}:00`);
+
                 const job = schedule.scheduleJob (setDate, () => {
                     Reservation.updateReservationStatus(index,'on going');
-                    console.log(`task completed ${hour} ${idactivity}`);
+                    
+                    const changeStatusTime = new Date( setDate.getTime() + result[0][0]['reservationTime']*60000 );
+                    //const changeStatusTime = new Date( setDate.getTime() + 1*60000 );   //[FOR TESTING]
+                    const jobInside = schedule.scheduleJob (changeStatusTime, () => {
+                        Reservation.updateReservationStatus(index,'finish');
+                        User.createRateRequest(iduser,index);
+                        console.log('done finish');
+                        jobInside.cancel(); //aici e problema!!!
+                    });
                     job.cancel();
                 });
                 res.status(201).json({message : "Reservaion created"});

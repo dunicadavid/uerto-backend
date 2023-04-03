@@ -99,6 +99,19 @@ exports.ratePlace = async (req, res, next) => {
     }
 }
 
+exports.getRateRequests = async (req, res, next) => {
+    try {
+        const iduser = req.query.iduser;
+
+        const [ratingRequests , _] = await User.getAllRateRequests(iduser);
+        
+        res.status(200).json({ratingRequests});
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
 exports.makePlaceFavourite = async (req, res, next) => {
     try {
         const { iduser, idplace } = req.body;

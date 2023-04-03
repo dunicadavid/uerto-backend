@@ -78,6 +78,10 @@ class User {
             {
                 query: 'UPDATE uerto.place SET rating = (rating * ratingCounter + ?)/(ratingCounter+1), ratingCounter = ratingCounter + 1 WHERE idplace = ?;',
                 parameters: [parseInt(rating), parseInt(idplace)]
+            },
+            {
+                query: 'DELETE FROM user_rating_require_action WHERE user = ? AND reservation = ?',
+                parameters: [parseInt(iduser), parseInt(idreservation)]
             }
         ];
 
@@ -92,6 +96,7 @@ class User {
             await connection.beginTransaction();
             await connection.query(queries[0].query, queries[0].parameters);
             await connection.query(queries[1].query, queries[1].parameters);
+            await connection.query(queries[2].query, queries[2].parameters);
             await connection.commit();
             connection.destroy();
             return;
@@ -101,6 +106,27 @@ class User {
             return err.message;
         }
         
+    }
+
+    static createRateRequest(iduser, idreservation) {
+        const sql = 'INSERT INTO user_rating_require_action (user,reservation) VALUES (?,?)';
+        const params = [iduser, idreservation];
+        
+        return db.query(sql,params);
+    }
+
+    static deleteRateRequest(iduser, idreservation) {
+        const sql = 'DELETE FROM user_rating_require_action WHERE user = ? AND reservation = ?';
+        const params = [iduser, idreservation];
+        
+        return db.query(sql,params);
+    }
+
+    static getAllRateRequests(iduser) {
+        const sql = 'SELECT idreservation , name, date FROM  user_rating_require_action ur JOIN reservation r ON r.idreservation = reservation JOIN place p ON idplace = place WHERE user = ?;';
+        const params = [iduser];
+        
+        return db.query(sql,params);
     }
 
     static getRatingsOfUser(iduser) {

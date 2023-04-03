@@ -10,6 +10,7 @@ router.route("/update").put(middleware.UserAuthorization,userControllers.updateU
 router.route("/id=:id").get(userControllers.getUserById);
 router.route("/idauth").get(userControllers.getUserByAuthId);   //[authorizata prin decodarea tokenului si transferul de uid]
 
+router.route("/interaction/rate-requests").get(middleware.UserAuthorization,userControllers.getRateRequests); 
 
 router.route("/interaction/rate-place").post(middleware.UserAuthorization,userControllers.ratePlace); 
 router.route("/interaction/favourite-place").post(middleware.UserAuthorization,userControllers.makePlaceFavourite);
