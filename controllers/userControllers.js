@@ -112,6 +112,19 @@ exports.getRateRequests = async (req, res, next) => {
     }
 }
 
+exports.deleteRateRequest = async (req, res, next) => {
+    try {
+        const {iduser, idreservation} = req.body;
+
+        await User.deleteRateRequest(iduser, idreservation);
+
+        res.status(201).json({ message: "Deleted reservation request" });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
 exports.makePlaceFavourite = async (req, res, next) => {
     try {
         const { iduser, idplace } = req.body;
