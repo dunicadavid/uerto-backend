@@ -123,7 +123,7 @@ class User {
     }
 
     static getAllRateRequests(iduser) {
-        const sql = 'SELECT idreservation , name, date FROM  user_rating_require_action ur JOIN reservation r ON r.idreservation = reservation JOIN place p ON idplace = place WHERE user = ?;';
+        const sql = 'SELECT idreservation, idplace, name, date FROM  user_rating_require_action ur JOIN reservation r ON r.idreservation = reservation JOIN place p ON idplace = place WHERE user = ?;';
         const params = [iduser];
         
         return db.query(sql,params);
