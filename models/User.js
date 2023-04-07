@@ -69,18 +69,18 @@ class User {
     }
 
     async rate(iduser, idplace, idreservation, rating) {
-
+        console.log(iduser, idplace, idreservation, rating);
         const queries = [
             {
                 query: 'INSERT INTO uerto.user_rating(place,user,reservation,rating)VALUES(?,?,?,?);',
-                parameters: [parseInt(iduser), parseInt(idplace), parseInt(idreservation), parseInt(rating)]
+                parameters: [parseInt(idplace), parseInt(iduser),  parseInt(idreservation), parseInt(rating)]
             },
             {
                 query: 'UPDATE uerto.place SET rating = (rating * ratingCounter + ?)/(ratingCounter+1), ratingCounter = ratingCounter + 1 WHERE idplace = ?;',
                 parameters: [parseInt(rating), parseInt(idplace)]
             },
             {
-                query: 'DELETE FROM user_rating_require_action WHERE user = ? AND reservation = ?',
+                query: 'DELETE FROM user_rating_require_action WHERE user = ? AND reservation = ?;',
                 parameters: [parseInt(iduser), parseInt(idreservation)]
             }
         ];
@@ -101,6 +101,7 @@ class User {
             connection.destroy();
             return;
         } catch(err) {
+            console.log(err);
             connection.rollback();
             connection.destroy();
             return err.message;
@@ -115,9 +116,9 @@ class User {
         return db.query(sql,params);
     }
 
-    static deleteRateRequest(iduser, idreservation) {
-        const sql = 'DELETE FROM user_rating_require_action WHERE user = ? AND reservation = ?';
-        const params = [iduser, idreservation];
+    static deleteRateRequest(idreservation) {
+        const sql = 'DELETE FROM user_rating_require_action WHERE reservation = ?';
+        const params = [idreservation];
         
         return db.query(sql,params);
     }

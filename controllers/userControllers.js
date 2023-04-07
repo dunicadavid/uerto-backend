@@ -80,6 +80,7 @@ exports.getUserByAuthId = async (req, res, next) => {
 exports.ratePlace = async (req, res, next) => {
     try {
         const { iduser, idplace, idreservation, rating } = req.body;
+
         const user = new User();
 
         const err = await user.rate(iduser, idplace, idreservation, rating);
@@ -89,8 +90,11 @@ exports.ratePlace = async (req, res, next) => {
         } else {
             if (err.substring(0, 15) === 'Duplicate entry')
                 res.status(500).json({ message: "Already rated your experience there." });
-            else
+            else {
+                console.log(err);
                 res.status(500).json({ message: err });
+            }
+
         }
 
     } catch (error) {
@@ -114,9 +118,9 @@ exports.getRateRequests = async (req, res, next) => {
 
 exports.deleteRateRequest = async (req, res, next) => {
     try {
-        const {iduser, idreservation} = req.body;
+        const {idreservation} = req.body;
 
-        await User.deleteRateRequest(iduser, idreservation);
+        await User.deleteRateRequest(idreservation);
 
         res.status(201).json({ message: "Deleted reservation request" });
     } catch (error) {

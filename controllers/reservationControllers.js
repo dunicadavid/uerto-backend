@@ -32,8 +32,6 @@ exports.createReservation = async (req, res, next) => {
             } else {
                 res.status(500).json({message : result});
             }
-            
-
         } else {
             res.status(406).json({message : "Not Acceptable"});
         }
