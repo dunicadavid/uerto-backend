@@ -43,6 +43,21 @@ exports.updateUser = async (req, res, next) => {
     }
 }
 
+exports.updateUserStrategy = async (req, res, next) => {
+    try {
+
+        const { iduser, strategy } = req.body;
+
+        await User.updateStrategy(iduser, strategy);
+
+        res.status(201).json({ message: "User strategy updated" });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
 exports.getUserById = async (req, res, next) => {
     console.log('aici');
     try {

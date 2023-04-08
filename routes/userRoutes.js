@@ -7,6 +7,7 @@ const router = express.Router();
 // @route GET && POST - /users/
 router.route("/create").post(userControllers.createUser);       //[authorizata prin decodarea tokenului si transferul de uid]
 router.route("/update").put(middleware.UserAuthorization,userControllers.updateUser);
+router.route("/update/strategy").put(middleware.UserAuthorization,userControllers.updateUserStrategy);
 router.route("/id=:id").get(userControllers.getUserById);
 router.route("/idauth").get(userControllers.getUserByAuthId);   //[authorizata prin decodarea tokenului si transferul de uid]
 

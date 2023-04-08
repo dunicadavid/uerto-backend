@@ -29,6 +29,14 @@ class User {
         return updatedUser;
     }
 
+    static updateStrategy(iduser, strategy) {
+        console.log(iduser,strategy)
+        const sql = 'UPDATE user SET nextStrategy = ? WHERE iduser = ?';
+        const params = [strategy, parseInt(iduser)];
+        
+        return db.query(sql,params);
+    }
+
     static findById(id) {
         const sql = `SELECT * FROM user where iduser = ?;`;
         const params = [id];
