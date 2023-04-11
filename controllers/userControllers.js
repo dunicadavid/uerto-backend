@@ -98,7 +98,7 @@ exports.ratePlace = async (req, res, next) => {
 
         const user = new User();
 
-        const err = await user.rate(iduser, idplace, idreservation, rating);
+        const err = await user.rate(iduser, idplace, idreservation, rating);///adauga rutins!!!
         
         if (!err) {
             res.status(201).json({ message: `Place rated successfully with ${rating} stars.` });
@@ -107,7 +107,7 @@ exports.ratePlace = async (req, res, next) => {
                 res.status(500).json({ message: "Already rated your experience there." });
             else {
                 console.log(err);
-                res.status(500).json({ message: err });
+                res.status(500).json({ message: err }); 
             }
 
         }

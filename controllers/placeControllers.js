@@ -452,7 +452,6 @@ exports.getRecommendation = async (req, res, next) => {
         const start = Date.now();
         const iduser = req.query.iduser;
         const strategy = parseInt(req.query.strategy);
-        const idplace = parseInt(req.query.idplace) || 0;
 
         if (strategy === 0 || strategy === 3) {
             //collaborative filtering strategy
@@ -499,11 +498,13 @@ exports.getRecommendation = async (req, res, next) => {
                 X,
             } = await preparePlaces();
 
-            const contentBasedRecommendation = predictWithContentBased(X, PLACES_IN_LIST, idplace);
+            const [idplace, _] = await Place.findLastMaxRatedPlaceOfUser(iduser);
+
+            const contentBasedRecommendation = predictWithContentBased(X, PLACES_IN_LIST, idplace[0]);
 
             const ids = [contentBasedRecommendation[1].idplace,contentBasedRecommendation[2].idplace,contentBasedRecommendation[3].idplace];
 
-            const [places, _] = await Place.findGroupById(ids);
+            const [places, ] = await Place.findGroupById(ids);
             res.status(200).json({ message: 'Successfull', places: places });
 
             console.log('content based on id X:');
