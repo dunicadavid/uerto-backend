@@ -9,9 +9,9 @@ exports.createUser = async (req, res, next) => {
 
         user = await user.save();
 
-        let [resUser, _] = await User.findByAuthId(idauth);
+        let [resUser, _] = await User.getUserByIdauth(idauth);
 
-        res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth } });
+        res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth , nextStrategy : resUser[0].nextStrategy} });
 
     } catch (error) {
         console.log(error);
