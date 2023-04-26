@@ -13,6 +13,7 @@ class Middleware {
             }
             return res.json({message : 'Unauthorize.'});
         } catch (e) {
+            console.log(e);
             if(typeof req.headers.authorization === 'undefined') {
                 return res.json({message : 'No token provided.'});
             }

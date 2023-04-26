@@ -79,11 +79,16 @@ exports.getUserByAuthId = async (req, res, next) => {
         const idauth = req.user.uid;
         const [user, _] = await User.getUserByIdauth(idauth);
 
+        const results = {};
+
         if (user.length === 0) {
             res.status(204).json({ message: "No user information" });
         } else {
-            console.log({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth , nextStrategy : user[0].nextStrategy});
-            res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth , nextStrategy : user[0].nextStrategy});
+            const [rateRequests, _] = await User.getAllRateRequests(user[0].iduser);
+            results.user = { userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth , nextStrategy : user[0].nextStrategy};
+            results.rateRequests = rateRequests;
+            console.log(results);
+            res.status(200).json(results);
         }
 
     } catch (error) {

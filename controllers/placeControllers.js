@@ -223,7 +223,7 @@ exports.getPlacesByName = async (req, res, next) => {
 
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
-        const results = {}
+        const results = {};
 
         const [places, _] = await Place.findByName(placeName);
 
