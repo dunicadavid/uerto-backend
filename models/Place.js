@@ -61,7 +61,7 @@ class Place {
     static findAll(filter, proximityGeohashes, type, sortedBy) {            
         let sql;
         let whereClauseActive = false;
-        sql = `SELECT idplace,name,category,location,geohash FROM place`;
+        sql = `SELECT idplace,name,category,location,geohash,rating,price FROM place`;
 
         if (filter != '0') {
             sql = sql + ` join place_filter_restaurant ON filterRestaurant = idfilterRestaurant WHERE category='${type}' AND ${filter}=1`;
