@@ -497,10 +497,10 @@ exports.getRecommendation = async (req, res, next) => {
                 PLACES_IN_LIST,
                 X,
             } = await preparePlaces();
-
+            
             const [idplace, _] = await Place.findLastMaxRatedPlaceOfUser(iduser);
 
-            const contentBasedRecommendation = predictWithContentBased(X, PLACES_IN_LIST, idplace[0]);
+            const contentBasedRecommendation = predictWithContentBased(X, PLACES_IN_LIST, idplace[0].place);
 
             const ids = [contentBasedRecommendation[1].idplace,contentBasedRecommendation[2].idplace,contentBasedRecommendation[3].idplace];
 

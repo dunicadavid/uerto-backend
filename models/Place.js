@@ -144,7 +144,7 @@ class Place {
     }
 
     static findLastMaxRatedPlaceOfUser(iduser) {
-        const sql = `SELECT place FROM user_rating JOIN reservation ON reservation = idreservation WHERE user = ? ORDER BY rating DESC ,date DESC LIMIT 1;`;
+        const sql = `SELECT user_rating.place FROM user_rating JOIN reservation ON reservation = idreservation WHERE user = ? ORDER BY rating DESC ,date DESC LIMIT 1;`;
         const param = [iduser];
 
         return db.query(sql,param);
