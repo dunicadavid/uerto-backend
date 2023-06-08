@@ -189,11 +189,11 @@ class Reservation {
 
     static findByUser(iduser, time, date, hour) {
         if(time === 'previous') {
-            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date < ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour < ?;';
+            const sql = 'SELECT idreservation, place, name, date, hour, partySize, status FROM reservation r JOIN place p ON p.idplace = r.place WHERE customer = ? AND date < ? UNION SELECT idreservation, place, name, date, hour, partySize, status FROM reservation r JOIN place p ON p.idplace = r.place WHERE customer = ? AND date = ? AND hour < ? ORDER BY date DESC, hour DESC;';
             const params = [iduser,date,iduser,date,hour];
             return db.query(sql, params);
         } else if (time === 'future') {
-            const sql = 'SELECT * FROM reservation WHERE customer = ? AND date > ? UNION SELECT * FROM reservation WHERE customer = ? AND date = ? AND hour > ?;';
+            const sql = 'SELECT idreservation, place, name, date, hour, partySize, status FROM reservation r JOIN place p ON p.idplace = r.place WHERE customer = ? AND date > ? UNION SELECT idreservation, place, name, date, hour, partySize, status FROM reservation r JOIN place p ON p.idplace = r.place WHERE customer = ? AND date = ? AND hour > ? ORDER BY date DESC, hour DESC;';
             const params = [iduser,date,iduser,date,hour];
             return db.query(sql, params);
         }
