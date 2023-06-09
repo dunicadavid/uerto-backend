@@ -4,6 +4,7 @@ const User = require('./User');
 class Middleware {
     async decodeToken(req,res,next) {
         try {
+
             const token = req.headers.authorization.split(' ')[1];
             const decodeValue = await admin.auth().verifyIdToken(token);
             console.log(token);
@@ -22,10 +23,10 @@ class Middleware {
     }
 
     async UserAuthorization(req,res,next) {
-        const start = Date.now();
+
         try {
             const [result, _] = await User.getIduserByIdauth(req.user.uid);
-            const providedIduser = parseInt(req.body.iduser) || parseInt(req.query.iduser) || parseInt(req.params.iduser) || 0;
+            const providedIduser = parseInt(req.body.iduser) || parseInt(req.query.iduser) || parseInt(req.params.iduser) ||0;
             if(result[0].iduser === providedIduser) {
                 return next();
             }

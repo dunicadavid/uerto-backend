@@ -1,22 +1,29 @@
 const User = require('../models/User');
+const path = require('path');
+const fs = require('fs');
 
 exports.createUser = async (req, res, next) => {
     try {
 
-        const { name, email, phone} = req.body;
+        const userData = JSON.parse(req.body.data);
+        const imageFile = req.file;
         const idauth = req.user.uid;
-        let user = new User(name, email, phone, idauth);
+
+        let user = new User(userData.name, userData.email, userData.phone, imageFile.filename, idauth);
 
         user = await user.save();
 
         let [resUser, _] = await User.getUserByIdauth(idauth);
 
-        res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth , nextStrategy : resUser[0].nextStrategy} });
+        res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth, photoURL: resUser[0].profileImagePath, nextStrategy: resUser[0].nextStrategy } });
 
     } catch (error) {
         console.log(error);
-        if (error.code === 'ER_DUP_ENTRY')
+        if (error.code === 'ER_DUP_ENTRY') {
+            const filePath = path.join(__dirname, '../images/users', req.file.filename);
+            fs.unlink(filePath, (error) => {});
             res.status(405).json({ message: "Mobile number already taken." }); //more cases [email and idauth]
+        }
         else
             next(error);
     }
@@ -28,7 +35,7 @@ exports.updateUser = async (req, res, next) => {
         const { iduser, name, phone } = req.body;
 
         const user = new User();
-        await user.update(iduser,name,phone);
+        await user.update(iduser, name, phone);
 
         res.status(201).json({ message: "User updated" });
 
@@ -40,6 +47,28 @@ exports.updateUser = async (req, res, next) => {
             res.status(405).json({ message: "Email already taken." });
         } else
             next(error);
+    }
+}
+
+exports.updateUserProfileImage = async (req, res, next) => {
+    try {
+        const userData = JSON.parse(req.body.data);
+        const imageFile = req.file;
+
+        const [result,_] = await User.updateImage(userData.iduser, imageFile.filename);
+
+        if(result[0].profileImagePath !== null && result[0].profileImagePath !== undefined) {
+            const filePath = path.join(__dirname, '../images/users', result[0].profileImagePath);
+            fs.unlink(filePath, (error) => {});
+        }
+
+        res.status(201).json({ message: "User profile image updated"});
+
+    } catch (error) {
+        const filePath = path.join(__dirname, '../images/users', req.file.filename);
+        fs.unlink(filePath, (error) => {});
+        console.log(error);
+        next(error);
     }
 }
 
@@ -58,14 +87,31 @@ exports.updateUserStrategy = async (req, res, next) => {
     }
 }
 
+exports.getUserProfileImage = async (req, res, next) => {
+
+    try {
+
+        const { filename } = req.params;
+
+        const imagePath = `images/users/${filename}`;
+
+        console.log(imagePath);
+
+        res.status(200).sendFile(path.resolve(imagePath));
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
 exports.getUserById = async (req, res, next) => {
-    console.log('aici');
     try {
         let userId = req.params.id;
         console.log(userId);
         let [user, _] = await User.findById(userId);
 
-        res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, nextStrategy : user[0].nextStrategy });
+        res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, nextStrategy: user[0].nextStrategy });
 
     } catch (error) {
         console.log(error);
@@ -85,7 +131,7 @@ exports.getUserByAuthId = async (req, res, next) => {
             res.status(204).json({ message: "No user information" });
         } else {
             const [rateRequests, _] = await User.getAllRateRequests(user[0].iduser);
-            results.user = { userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth , nextStrategy : user[0].nextStrategy};
+            results.user = { userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, photoURL: user[0].profileImagePath, nextStrategy: user[0].nextStrategy };
             results.rateRequests = rateRequests;
             console.log(results);
             res.status(200).json(results);
@@ -104,7 +150,7 @@ exports.ratePlace = async (req, res, next) => {
         const user = new User();
 
         const err = await user.rate(iduser, idplace, idreservation, rating);///adauga rutins!!!
-        
+
         if (!err) {
             res.status(201).json({ message: `Place rated successfully with ${rating} stars.` });
         } else {
@@ -112,7 +158,7 @@ exports.ratePlace = async (req, res, next) => {
                 res.status(500).json({ message: "Already rated your experience there." });
             else {
                 console.log(err);
-                res.status(500).json({ message: err }); 
+                res.status(500).json({ message: err });
             }
 
         }
@@ -127,9 +173,9 @@ exports.getRateRequests = async (req, res, next) => {
     try {
         const iduser = req.query.iduser;
 
-        const [ratingRequests , _] = await User.getAllRateRequests(iduser);
-        
-        res.status(200).json({ratingRequests});
+        const [ratingRequests, _] = await User.getAllRateRequests(iduser);
+
+        res.status(200).json({ ratingRequests });
     } catch (error) {
         console.log(error);
         next(error);
@@ -138,7 +184,7 @@ exports.getRateRequests = async (req, res, next) => {
 
 exports.deleteRateRequest = async (req, res, next) => {
     try {
-        const {idreservation} = req.body;
+        const { idreservation } = req.body;
 
         await User.deleteRateRequest(idreservation);
 

@@ -3,17 +3,18 @@ const { db } = require('../config/db');
 const mysql = require('mysql2/promise');
 
 class User {
-    constructor(name, email, phone, authId) {
+    constructor(name, email, phone, profileImagePath, authId) {
         
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.authId = authId;
+        this.profileImagePath = profileImagePath;
     }
 
     async save() {
-        const sql = 'INSERT INTO user(name,phone,email,idauth) VALUES(?,?,?,?);';
-        const params = [this.name,this.phone,this.email,this.authId];
+        const sql = 'INSERT INTO user(name,phone,email,profileImagePath,idauth) VALUES(?,?,?,?,?);';
+        const params = [this.name,this.phone,this.email,this.profileImagePath,this.authId];
 
         const [newUser, _] = await db.query(sql,params);
 
@@ -29,8 +30,40 @@ class User {
         return updatedUser;
     }
 
+    static async updateImage(iduser, path) {
+        const queries = [
+            {
+                query: 'SELECT profileImagePath FROM user WHERE iduser = ?;',
+                parameters: [parseInt(iduser)]
+            },
+            {
+                query: 'UPDATE user SET profileImagePath = ? WHERE iduser = ?;',
+                parameters: [path, parseInt(iduser)]
+            },
+        ];
+
+        const connection = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            database: process.env.DB_NAME,
+            password: process.env.DB_PASSWORD,
+        });
+
+        try{
+            await connection.beginTransaction();
+            const oldPath = await connection.query(queries[0].query, queries[0].parameters);
+            await connection.query(queries[1].query, queries[1].parameters);
+            await connection.commit();
+            connection.destroy();
+            return oldPath;
+        } catch(err) {
+            connection.rollback();
+            connection.destroy();
+            return err.message;
+        }
+    }
+
     static updateStrategy(iduser, strategy) {
-        console.log(iduser,strategy)
         const sql = 'UPDATE user SET nextStrategy = ? WHERE iduser = ?';
         const params = [strategy, parseInt(iduser)];
         
