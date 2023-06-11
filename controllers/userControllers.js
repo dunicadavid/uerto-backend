@@ -111,7 +111,7 @@ exports.getUserById = async (req, res, next) => {
         console.log(userId);
         let [user, _] = await User.findById(userId);
 
-        res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, nextStrategy: user[0].nextStrategy });
+        res.status(200).json({ userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, photoUrl: user[0].profileImagePath, nextStrategy: user[0].nextStrategy });
 
     } catch (error) {
         console.log(error);
@@ -131,7 +131,7 @@ exports.getUserByAuthId = async (req, res, next) => {
             res.status(204).json({ message: "No user information" });
         } else {
             const [rateRequests, _] = await User.getAllRateRequests(user[0].iduser);
-            results.user = { userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, photoURL: user[0].profileImagePath, nextStrategy: user[0].nextStrategy };
+            results.user = { userId: user[0].iduser, fullname: user[0].name, phoneNumber: user[0].phone, email: user[0].email, uid: user[0].idauth, photoUrl: user[0].profileImagePath, nextStrategy: user[0].nextStrategy };
             results.rateRequests = rateRequests;
             console.log(results);
             res.status(200).json(results);

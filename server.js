@@ -13,8 +13,10 @@ const app = express();
 //middleware
 app.use(helmet());
 app.use(express.json());
-app.use(middleware.decodeToken);
 
+app.use("/images", require("./routes/imagesRoutes"));
+
+app.use(middleware.decodeToken);
 app.use("/users", require("./routes/userRoutes"));
 app.use("/places", require("./routes/placeRoutes"));
 app.use("/reservations", require("./routes/reservationRoutes"));
