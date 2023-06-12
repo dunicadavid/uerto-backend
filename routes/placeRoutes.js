@@ -2,12 +2,14 @@ const express = require('express');
 const placeControllers = require('../controllers/placeControllers');
 const middleware = require('../models/Middleware');
 const router = express.Router();
+const { uploadPlace } = require('../config/storage.js');
 
 // @route GET && POST - /places/
 //BY PLACE
 router.route("/create").post(placeControllers.createPlace); //modificam ulterior + authorization check
 router.route("/update/info").put(placeControllers.updatePlaceInfo); 
 router.route("/update/location").put(placeControllers.updatePlaceLocation); 
+router.route("/update/images").put(uploadPlace.array('images', 3), placeControllers.updatePlaceImages); 
 router.route("/update/filter/restaurant").put(placeControllers.updatePlaceFilterRestaurant);
 router.route("/update/filter/leasure").put(placeControllers.updatePlaceFilterLeasure);
 

@@ -6,6 +6,8 @@ const { predictWithCfItemBased, predictWithCfUserBased } = require('../recommend
 const { preparePlaces } = require('../recommender-system/placesFetch');
 const { prepareRatingsOfUser, prepareRatings } = require('../recommender-system/ratingsFetch');
 
+const fs = require('fs');
+const path = require('path');
 const geo = require('geo-hash');
 const proximityhash = require('proximityhash');
 
@@ -105,6 +107,36 @@ exports.updatePlaceInfo = async (req, res, next) => {
     }
 }
 
+exports.updatePlaceImages = async (req, res, next) => {
+    try {
+        const idplace = parseInt(req.query.idplace);
+        const imageFiles = req.files;
+
+        const [result,_] = await Place.updateImages(idplace, imageFiles.map((file) => file.filename));
+
+        console.log(result[0]);
+
+        if(result[0].imageFirst !== null && result[0].imageFirst !== undefined) {
+            let filePath = path.join(__dirname, '../images/places', result[0].imageFirst);
+            fs.unlink(filePath, (error) => {});
+            filePath = path.join(__dirname, '../images/places', result[0].imageSecond);
+            fs.unlink(filePath, (error) => {});
+            filePath = path.join(__dirname, '../images/places', result[0].imageThird);
+            fs.unlink(filePath, (error) => {});
+        }
+
+        res.status(201).json({ message: "Place images updated",  images: imageFiles.map((file) => file.filename)});
+
+    } catch (error) {
+        req.files.forEach((file) => {
+            const filePath = path.join(__dirname, '../images/places', file.filename);
+            fs.unlink(filePath, (error) => {});
+          });
+        console.log(error);
+        next(error);
+    }
+}
+
 exports.updatePlaceLocation = async (req, res, next) => {
     try {
         const { idplace, location, latitude, longitude } = req.body;
@@ -195,8 +227,31 @@ exports.getPlaceById = async (req, res, next) => {
         let [check] = await Place.favouriteCheck(iduser, idplace);
 
         place[0].favourite = check[0].favourite;
+        place[0].images = [place[0].imageFirst ,place[0].imageSecond , place[0].imageThird];
+        
+        delete place[0].imageFirst;
+        delete place[0].imageSecond;
+        delete place[0].imageThird;
 
         res.status(200).json({ place: place[0] });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
+
+exports.getPlaceImage = async (req, res, next) => {
+
+    try {
+
+        const { filename } = req.params;
+
+        const imagePath = `images/places/${filename}`;
+
+        console.log(imagePath);
+
+        res.status(200).sendFile(path.resolve(imagePath));
+
     } catch (error) {
         console.log(error);
         next(error);

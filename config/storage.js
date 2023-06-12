@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 
-const storage = multer.diskStorage({
+const storageUser = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'images/users/')
     },
@@ -10,6 +10,16 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({storage: storage});
+const storagePlace = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images/places/')
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+});
 
-module.exports = { storage, upload };
+const uploadUser = multer({storage: storageUser});
+const uploadPlace = multer({storage: storagePlace});
+
+module.exports = { storageUser, uploadUser , storagePlace, uploadPlace };

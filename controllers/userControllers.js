@@ -15,7 +15,7 @@ exports.createUser = async (req, res, next) => {
 
         let [resUser, _] = await User.getUserByIdauth(idauth);
 
-        res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth, photoURL: resUser[0].profileImagePath, nextStrategy: resUser[0].nextStrategy } });
+        res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth, photoUrl: resUser[0].profileImagePath, nextStrategy: resUser[0].nextStrategy } });
 
     } catch (error) {
         console.log(error);
@@ -52,17 +52,17 @@ exports.updateUser = async (req, res, next) => {
 
 exports.updateUserProfileImage = async (req, res, next) => {
     try {
-        const userData = JSON.parse(req.body.data);
+        const iduser = parseInt(req.query.iduser);
         const imageFile = req.file;
 
-        const [result,_] = await User.updateImage(userData.iduser, imageFile.filename);
+        const [result,_] = await User.updateImage(iduser, imageFile.filename);
 
         if(result[0].profileImagePath !== null && result[0].profileImagePath !== undefined) {
             const filePath = path.join(__dirname, '../images/users', result[0].profileImagePath);
             fs.unlink(filePath, (error) => {});
         }
 
-        res.status(201).json({ message: "User profile image updated"});
+        res.status(201).json({ message: "User profile image updated",  photoUrl: imageFile.filename});
 
     } catch (error) {
         const filePath = path.join(__dirname, '../images/users', req.file.filename);

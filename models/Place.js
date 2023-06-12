@@ -1,4 +1,5 @@
 const { db } = require('../config/db');
+const mysql = require('mysql2/promise');
 const geo = require('geo-hash');
 
 class Place {
@@ -39,6 +40,39 @@ class Place {
         return updateLocationPlace;
     }
 
+    static async updateImages(idplace, path) {
+        const queries = [
+            {
+                query: 'SELECT imageFirst, imageSecond, imageThird FROM place WHERE idplace = ?;',
+                parameters: [parseInt(idplace)]
+            },
+            {
+                query: 'UPDATE place SET imageFirst = ?, imageSecond = ?, imageThird = ? WHERE idplace = ?;',
+                parameters: [...path, parseInt(idplace)]
+            },
+        ];
+
+        const connection = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            database: process.env.DB_NAME,
+            password: process.env.DB_PASSWORD,
+        });
+
+        try{
+            await connection.beginTransaction();
+            const oldPath = await connection.query(queries[0].query, queries[0].parameters);
+            await connection.query(queries[1].query, queries[1].parameters);
+            await connection.commit();
+            connection.destroy();
+            return oldPath;
+        } catch(err) {
+            connection.rollback();
+            connection.destroy();
+            return err.message;
+        }
+    }
+
     //vezi sql injection
     async updateFilterRestaurant(idplace,queryString) {
         const sql = `UPDATE uerto.place_filter_restaurant SET ${queryString} WHERE idfilterRestaurant = (SELECT filterRestaurant FROM uerto.place WHERE idplace = ? LIMIT 1);`;
@@ -61,7 +95,7 @@ class Place {
     static findAll(filter, proximityGeohashes, type, sortedBy) {            
         let sql;
         let whereClauseActive = false;
-        sql = `SELECT idplace,name,category,location,geohash,rating,price FROM place`;
+        sql = `SELECT idplace,imageFirst,name,category,location,geohash,rating,price FROM place`;
 
         if (filter != '0') {
             sql = sql + ` join place_filter_restaurant ON filterRestaurant = idfilterRestaurant WHERE category='${type}' AND ${filter}=1`;
