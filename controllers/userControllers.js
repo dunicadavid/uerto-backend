@@ -4,16 +4,16 @@ const fs = require('fs');
 
 exports.createUser = async (req, res, next) => {
     try {
+        console.log("intra");
+        // const userData = JSON.parse(req.body.data);
+        // const imageFile = req.file;
+        const userData = req.body;
 
-        const userData = JSON.parse(req.body.data);
-        const imageFile = req.file;
-        const idauth = req.user.uid;
-
-        let user = new User(userData.name, userData.email, userData.phone, imageFile.filename, idauth);
-
+        let user = new User(userData.name, userData.email, userData.phone, userData.idauth);
+        console.log(user);
         user = await user.save();
 
-        let [resUser, _] = await User.getUserByIdauth(idauth);
+        let [resUser, _] = await User.getUserByIdauth(userData.idauth);
 
         res.status(201).json({ message: "User created", user: { userId: resUser[0].iduser, fullname: resUser[0].name, phoneNumber: resUser[0].phone, email: resUser[0].email, uid: resUser[0].idauth, photoUrl: resUser[0].profileImagePath, nextStrategy: resUser[0].nextStrategy } });
 

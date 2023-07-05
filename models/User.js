@@ -3,7 +3,7 @@ const { db } = require('../config/db');
 const mysql = require('mysql2/promise');
 
 class User {
-    constructor(name, email, phone, profileImagePath, authId) {
+    constructor(name, email, phone, authId, profileImagePath = "") {
         
         this.name = name;
         this.email = email;
@@ -13,8 +13,8 @@ class User {
     }
 
     async save() {
-        const sql = 'INSERT INTO user(name,phone,email,profileImagePath,idauth) VALUES(?,?,?,?,?);';
-        const params = [this.name,this.phone,this.email,this.profileImagePath,this.authId];
+        const sql = 'INSERT INTO user(name,phone,email,idauth) VALUES(?,?,?,?);';
+        const params = [this.name,this.phone,this.email,this.authId];
 
         const [newUser, _] = await db.query(sql,params);
 

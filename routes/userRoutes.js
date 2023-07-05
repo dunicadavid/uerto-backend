@@ -6,7 +6,7 @@ const { uploadUser } = require('../config/storage.js');
 
 
 // @route GET && POST - /users/
-router.route("/create").post(uploadUser.single("image"),userControllers.createUser);       //[authorizata prin decodarea tokenului si transferul de uid]
+router.route("/create").post(userControllers.createUser);       //[authorizata prin decodarea tokenului si transferul de uid]
 router.route("/update").put(middleware.UserAuthorization,userControllers.updateUser);
 router.route("/update/profile-image").put(middleware.UserAuthorization,uploadUser.single("image"),userControllers.updateUserProfileImage);
 router.route("/update/strategy").put(middleware.UserAuthorization,userControllers.updateUserStrategy);
