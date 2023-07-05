@@ -83,7 +83,7 @@ exports.createPlace = async (req, res, next) => {
 
         place = await place.save();
 
-        res.status(201).json({ message: "Place created" });
+        res.status(201).json({ message: "Place created successful" });
     } catch (error) {
         console.log(error);
         next(error);
